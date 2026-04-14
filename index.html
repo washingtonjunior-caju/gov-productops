@@ -308,10 +308,10 @@ body {
     <div class="roadmap-col">
       <div class="roadmap-col-header cp"><div class="dot"></div>Curto prazo — H1 2026</div>
       <div class="roadmap-items">
-        <div class="roadmap-item">
+        <div class="roadmap-item" onclick="openModal('piloto-tese1')" style="cursor:pointer;">
           <div class="roadmap-item-num">1.</div>
           <div class="roadmap-item-text">
-            Rodar desdobramento das Teses
+            <span style="color:var(--blue);">Rodar desdobramento das Teses <span style="font-size:11px;">↗</span></span>
             <span class="date-tag">Abril 2026</span>
             <span class="sub">Piloto na Tese 1 — fichas de Aposta com diagnóstico e impacto estimado</span>
           </div>
@@ -510,6 +510,34 @@ const data = {
 <h3>Pré-condição</h3>
 <p>Pressupõe uso disciplinado do Jira upstream. Product Ops deve verificar a consistência antes de rodar em formato pleno — se necessário, começa com escopo reduzido.</p>
 <div class="connect-box"><strong>Alimentado por:</strong> uso disciplinado do Jira · link épicos → iniciativas.<br><strong>Alimenta:</strong> Roadmap Sync Mensal · Planejamento de Roadmap · liderança de produto.</div>`
+},
+
+'piloto-tese1': {
+  type: 'blue', label: 'Próximo passo · Em andamento',
+  title: 'Piloto Tese 1 — Desdobramento para Apostas',
+  body: `<h3>Por que piloto</h3>
+<p>Testar o modelo com a Tese 1 primeiro, corrigir onde quebrar, ter frame sólido para replicar nas demais.</p>
+<h3>Passos</h3>
+<ol>
+  <li>Validar North Stars e Alavancas com Sponsors (Nanda + Edno)</li>
+  <li>Construir visão de árvore de métricas para garantir coerência entre teses</li>
+  <li>Definir Apostas e Passivos por Alavanca</li>
+  <li>Atribuir Owner a cada Aposta</li>
+  <li>Owners produzem 1-pagers de Aposta (template definido)</li>
+  <li>Sponsors revisam 1-pagers</li>
+  <li>Product Ops registra Apostas e Passivos no sistema com rastreabilidade completa</li>
+</ol>
+<h3>Produz</h3>
+<ul>
+  <li>Ficha da Tese 1 completa</li>
+  <li>1-pagers de Aposta</li>
+  <li>Apostas no sistema</li>
+</ul>
+<h3>Horizonte</h3>
+<p>Abril — pronto antes do próximo planejamento de roadmap.</p>
+<h3>Depois</h3>
+<p>Replicar para Teses 2, 3 e 4.</p>
+<p style="margin-top:16px;"><a href="https://docs.google.com/spreadsheets/d/1tJJYYzs_m2-mrGTXoR8UB_XJFwUTvEoTpm4syIEh9bY/edit?gid=223294684#gid=223294684" target="_blank" style="color:var(--blue);font-size:13px;">Ver Ficha da Tese 1 (rascunho atual) ↗</a></p>`
 }
 
 };
