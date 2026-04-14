@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Ops — Caju</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F9FB;
+  --surface: #FFFFFF;
+  --surface-raised: #F0F1F4;
+  --border: #D8DBE2;
+  --border-light: #E4E6EB;
+  --text: #1A1D24;
+  --text-muted: #555B68;
+  --text-dim: #8B919E;
+  --blue: #2563EB;
+  --blue-bg: rgba(37,99,235,0.07);
+  --blue-border: rgba(37,99,235,0.22);
+  --amber: #D97706;
+  --amber-bg: rgba(217,119,6,0.07);
+  --amber-border: rgba(217,119,6,0.22);
+  --green: #059669;
+  --green-bg: rgba(5,150,105,0.07);
+  --green-border: rgba(5,150,105,0.22);
+  --purple: #7C3AED;
+  --purple-bg: rgba(124,58,237,0.06);
+  --purple-border: rgba(124,58,237,0.20);
+  --gray: #6B7280;
+  --gray-bg: rgba(107,114,128,0.07);
+  --gray-border: rgba(107,114,128,0.22);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; gap: 20px; }
+.header-left h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.header-left h1 span { color: var(--text-muted); font-weight: 400; }
+.header-left .subtitle { font-size: 13px; color: var(--text-dim); margin-top: 6px; font-family: 'DM Mono', monospace; }
+.doc-link { font-size: 11px; color: var(--blue); text-decoration: none; font-family: 'DM Mono', monospace; border: 1px solid var(--blue-border); background: var(--blue-bg); border-radius: 4px; padding: 3px 9px; display: inline-flex; align-items: center; gap: 5px; transition: opacity 0.15s; white-space: nowrap; }
+.doc-link:hover { opacity: 0.75; }
+.doc-link::before { content: '↗'; font-size: 10px; }
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* Pilares */
+.pilares { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pilar { background: var(--surface); border: 1px solid var(--border-light); border-radius: 10px; padding: 16px 18px 18px; position: relative; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.pilar:hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.pilar-accent { position: absolute; top: 0; left: 18px; right: 18px; height: 2px; border-radius: 0 0 2px 2px; }
+.pilar:nth-child(1) .pilar-accent { background: var(--blue); }
+.pilar:nth-child(2) .pilar-accent { background: var(--amber); }
+.pilar:nth-child(3) .pilar-accent { background: var(--green); }
+.pilar h3 { font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 8px; letter-spacing: -0.01em; }
+.pilar p { font-size: 12.5px; color: var(--text-muted); line-height: 1.55; }
+.pilar-hint { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-dim); margin-top: 10px; }
+
+/* Modal genérico */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 24px; }
+.modal-overlay.active { display: flex; }
+.modal { background: var(--surface); border-radius: 14px; border: 1px solid var(--border-light); max-width: 600px; width: 100%; padding: 28px 32px; position: relative; max-height: 80vh; overflow-y: auto; }
+.modal-type { font-size: 10px; font-family: 'DM Mono', monospace; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.modal-type.blue { color: var(--blue); }
+.modal-type.amber { color: var(--amber); }
+.modal-type.green { color: var(--green); }
+.modal h2 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 14px; line-height: 1.3; }
+.modal-body-text p { font-size: 13.5px; color: var(--text-muted); line-height: 1.65; margin-bottom: 10px; }
+.modal-body-text p:last-child { margin-bottom: 0; }
+.modal-body-text h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); margin: 16px 0 6px; }
+.modal-body-text ul { margin: 0 0 10px 18px; }
+.modal-body-text li { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 3px; }
+.modal-body-text ol { margin: 0 0 10px 18px; }
+.modal-body-text ol li { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 3px; }
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.meta-item { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; }
+.meta-label { font-size: 9.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
+.meta-value { font-size: 12.5px; color: var(--text); }
+.connect-box { background: var(--purple-bg); border: 1px solid var(--purple-border); border-radius: 7px; padding: 10px 14px; margin-top: 14px; font-size: 12.5px; color: var(--text-muted); line-height: 1.55; }
+.connect-box strong { color: var(--purple); }
+.modal-close { position: absolute; top: 16px; right: 16px; background: var(--surface-raised); border: 1px solid var(--border-light); border-radius: 6px; width: 28px; height: 28px; font-size: 14px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; }
+.modal-close:hover { background: var(--border-light); }
+
+/* Governança */
+.gov-block { background: var(--surface); border: 1px solid var(--border-light); border-radius: 10px; padding: 20px 22px; }
+.gov-intro { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 18px; }
+.desdobramento { display: flex; align-items: center; margin-bottom: 18px; overflow-x: auto; }
+.desdobramento-step { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 80px; }
+.desdobramento-step .box { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11.5px; font-weight: 500; white-space: nowrap; width: 100%; text-align: center; }
+.desdobramento-step .label { font-size: 9.5px; font-family: 'DM Mono', monospace; color: var(--text-dim); white-space: nowrap; }
+.desdobramento-arrow { color: var(--text-dim); font-size: 13px; padding: 0 4px; flex-shrink: 0; margin-bottom: 14px; }
+
+/* Rituais — grid horizontal com altura igual */
+.rituais { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: stretch; }
+.ritual { border-radius: 8px; padding: 12px 14px; border: 1px solid; cursor: pointer; transition: box-shadow 0.15s; display: flex; flex-direction: column; }
+.ritual:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.ritual.estrategico { background: var(--blue-bg); border-color: var(--blue-border); }
+.ritual.tatico { background: var(--amber-bg); border-color: var(--amber-border); }
+.ritual.operacional { background: var(--green-bg); border-color: var(--green-border); }
+.ritual-layer { font-size: 9.5px; font-family: 'DM Mono', monospace; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.ritual.estrategico .ritual-layer { color: var(--blue); }
+.ritual.tatico .ritual-layer { color: var(--amber); }
+.ritual.operacional .ritual-layer { color: var(--green); }
+.ritual h4 { font-size: 12.5px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+.ritual p { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.ritual-hint { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-dim); margin-top: 8px; }
+
+/* Frentes */
+.frentes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.frente { background: var(--surface); border: 1px solid var(--border-light); border-radius: 8px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.frente-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.frente-body h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; letter-spacing: -0.01em; }
+.frente-body p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.frente-tag { display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace; border-radius: 3px; padding: 1px 6px; margin-top: 5px; border: 1px solid; }
+
+/* Roadmap */
+.roadmap-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.roadmap-col { background: var(--surface); border: 1px solid var(--border-light); border-radius: 10px; overflow: hidden; }
+.roadmap-col-header { padding: 10px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); }
+.roadmap-col-header .dot { width: 7px; height: 7px; border-radius: 50%; }
+.roadmap-col-header.cp { color: var(--blue); }
+.roadmap-col-header.cp .dot { background: var(--blue); }
+.roadmap-col-header.mp { color: var(--purple); }
+.roadmap-col-header.mp .dot { background: var(--purple); }
+.roadmap-items { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.roadmap-item { display: flex; gap: 10px; align-items: flex-start; }
+.roadmap-item-num { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-dim); padding-top: 2px; min-width: 16px; }
+.roadmap-item-text { font-size: 12.5px; color: var(--text); line-height: 1.5; }
+.roadmap-item-text .sub { display: block; font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.date-tag { display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-dim); margin-top: 3px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.section-block { animation: fadeUp 0.4s ease both; }
+.section-block:nth-child(1) { animation-delay: 0.05s; }
+.section-block:nth-child(2) { animation-delay: 0.10s; }
+.section-block:nth-child(3) { animation-delay: 0.15s; }
+.section-block:nth-child(4) { animation-delay: 0.20s; }
+.section-block:nth-child(5) { animation-delay: 0.25s; }
+.section-block:nth-child(6) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header section-block">
+  <div class="header-left">
+    <h1>Product Ops <span>— Caju</span></h1>
+    <div class="subtitle">Abril 2026</div>
+  </div>
+  <a class="doc-link" href="governanca-light-v3.html" target="_blank">Documento completo de governança</a>
+</div>
+
+<!-- Pilares -->
+<div class="section-block">
+  <div class="section-label">O que buscamos resolver</div>
+  <div class="pilares">
+    <div class="pilar" onclick="openModal('pilar-1')">
+      <div class="pilar-accent"></div>
+      <h3>Clareza e alinhamento de direção</h3>
+      <p>Garantir que todos entendam o que estamos construindo, por quê e como conecta com os objetivos da Caju.</p>
+      <div class="pilar-hint">clique para saber mais →</div>
+    </div>
+    <div class="pilar" onclick="openModal('pilar-2')">
+      <div class="pilar-accent"></div>
+      <h3>Planejamento e visibilidade</h3>
+      <p>Estruturar entrada de demandas, coordenação de projetos cross, alinhamento de dependências, metodologia de priorização e orquestração de lançamentos.</p>
+      <div class="pilar-hint">clique para saber mais →</div>
+    </div>
+    <div class="pilar" onclick="openModal('pilar-3')">
+      <div class="pilar-accent"></div>
+      <h3>Instrumentação do fluxo de produto</h3>
+      <p>Tornar o fluxo de trabalho visível — do compromisso à entrega — para que o time valide hipóteses com mais frequência, identifique gargalos com dados e construa produtos melhores.</p>
+      <div class="pilar-hint">clique para saber mais →</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Governança Macro -->
+<div class="section-block">
+  <div class="section-label">Governança — visão macro</div>
+  <div class="gov-block">
+    <p class="gov-intro">O modelo conecta estratégia e execução em três camadas: <strong>Estratégica</strong> (o que apostamos e por quê), <strong>Tática</strong> (como planejamos e priorizamos com realidade) e <strong>Operacional</strong> (como monitoramos e entregamos). O desdobramento garante rastreabilidade de ponta a ponta — qualquer épico no Jira tem uma Aposta que o origina e uma Tese que dá o contexto estratégico.</p>
+    <div class="desdobramento">
+      <div class="desdobramento-step"><div class="box">Tese</div></div>
+      <div class="desdobramento-arrow">→</div>
+      <div class="desdobramento-step"><div class="box">North Star</div></div>
+      <div class="desdobramento-arrow">→</div>
+      <div class="desdobramento-step"><div class="box">Alavancas</div></div>
+      <div class="desdobramento-arrow">→</div>
+      <div class="desdobramento-step"><div class="box">Apostas</div></div>
+      <div class="desdobramento-arrow">→</div>
+      <div class="desdobramento-step"><div class="box">Iniciativas</div></div>
+      <div class="desdobramento-arrow">→</div>
+      <div class="desdobramento-step"><div class="box">Épicos / Tasks</div></div>
+    </div>
+    <div class="rituais">
+      <div class="ritual estrategico" onclick="openModal('ritual-estrategico')">
+        <div class="ritual-layer">Estratégico</div>
+        <h4>Planejamento Anual + Strategic Review</h4>
+        <p>Define apostas do ciclo com diagnóstico, justificativa e impacto estimado. Revisão semestral garante que as apostas continuam válidas para o período seguinte.</p>
+        <div class="ritual-hint">clique para saber mais →</div>
+      </div>
+      <div class="ritual tatico" onclick="openModal('ritual-tatico')">
+        <div class="ritual-layer">Tático</div>
+        <h4>Planejamento de Roadmap + Sync Mensal</h4>
+        <p>Confronta apostas com capacidade real, mapeia dependências cross-squad e alinha priorização. Sync mensal mantém o plano calibrado ao longo do ciclo.</p>
+        <div class="ritual-hint">clique para saber mais →</div>
+      </div>
+      <div class="ritual operacional" onclick="openModal('ritual-operacional')">
+        <div class="ritual-layer">Operacional</div>
+        <h4>Stream Review</h4>
+        <p>Revisão trimestral de métricas upstream e downstream — lead time, cycle time, WIP, aderência ao planejamento — para identificar gargalos e melhorar continuamente o fluxo.</p>
+        <div class="ritual-hint">clique para saber mais →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Frentes de Governança -->
+<div class="section-block">
+  <div class="section-label">Frentes de trabalho — Governança</div>
+  <div class="frentes-grid">
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--blue);"></div>
+      <div class="frente-body">
+        <h4>Desdobramento estratégico</h4>
+        <p>Construir e pilotar o modelo Tese → Aposta com as quatro Teses da Caju. Formular fichas de Aposta com diagnóstico, justificativa e impacto esperado.</p>
+        <span class="frente-tag" style="background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue);">Estratégico</span>
+      </div>
+    </div>
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--amber);"></div>
+      <div class="frente-body">
+        <h4>Intake Process</h4>
+        <p>Canal estruturado para captura contínua de dores e oportunidades — de CX, CS, Vendas e squads — com contexto suficiente para avaliação e priorização.</p>
+        <span class="frente-tag" style="background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber);">Tático</span>
+      </div>
+    </div>
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--amber);"></div>
+      <div class="frente-body">
+        <h4>Priorização</h4>
+        <p>Estabelecer critério explícito e compartilhado para priorizar apostas concorrentes — tornando trade-offs visíveis e a conversa de planejamento estruturada.</p>
+        <span class="frente-tag" style="background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber);">Tático</span>
+      </div>
+    </div>
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--amber);"></div>
+      <div class="frente-body">
+        <h4>Orquestração de lançamentos</h4>
+        <p>Formalizar o processo de coordenação de lançamentos — lead time adequado, ROD como artefato central, agenda sync semanal com CX, CS e Vendas.</p>
+        <span class="frente-tag" style="background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber);">Tático</span>
+      </div>
+    </div>
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--green);"></div>
+      <div class="frente-body">
+        <h4>Instrumentação de fluxo de produto</h4>
+        <p>Construir capacidade de mensuração do fluxo — lead time, cycle time, WIP, throughput e trabalho não planejado — para que a camada operacional da governança funcione com dados reais.</p>
+        <span class="frente-tag" style="background: var(--green-bg); border-color: var(--green-border); color: var(--green);">Operacional</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Temas Cross -->
+<div class="section-block">
+  <div class="section-label">Frentes de trabalho — Temas cross</div>
+  <div class="frentes-grid">
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--gray);"></div>
+      <div class="frente-body">
+        <h4>Privacy by Design · Security by Design</h4>
+        <p>Apoio na interface entre produto, jurídico e segurança — garantindo que requisitos de privacidade e segurança sejam considerados desde a concepção das apostas.</p>
+        <span class="frente-tag" style="background: var(--gray-bg); border-color: var(--gray-border); color: var(--gray);">Cross</span>
+      </div>
+    </div>
+    <div class="frente">
+      <div class="frente-dot" style="background: var(--gray);"></div>
+      <div class="frente-body">
+        <h4>Interface com regulatório</h4>
+        <p>Visibilidade e coordenação de demandas regulatórias no portfólio — garantindo que obrigações tenham capacidade reservada e não entrem em conflito com apostas estratégicas.</p>
+        <span class="frente-tag" style="background: var(--gray-bg); border-color: var(--gray-border); color: var(--gray);">Cross</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Próximos passos -->
+<div class="section-block">
+  <div class="section-label">Próximos passos</div>
+  <div class="roadmap-cols">
+    <div class="roadmap-col">
+      <div class="roadmap-col-header cp"><div class="dot"></div>Curto prazo — H1 2026</div>
+      <div class="roadmap-items">
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">1.</div>
+          <div class="roadmap-item-text">
+            Rodar desdobramento das Teses
+            <span class="date-tag">Abril 2026</span>
+            <span class="sub">Piloto na Tese 1 — fichas de Aposta com diagnóstico e impacto estimado</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">2.</div>
+          <div class="roadmap-item-text">
+            Lançar Intake Process
+            <span class="date-tag">Abril 2026</span>
+            <span class="sub">Formulário de captura de demandas + critério de triagem</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">3.</div>
+          <div class="roadmap-item-text">
+            Estabelecer frame de priorização
+            <span class="date-tag">Maio 2026</span>
+            <span class="sub">Critério explícito e compartilhado para apostas concorrentes</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">4.</div>
+          <div class="roadmap-item-text">
+            Formalizar orquestração de lançamentos
+            <span class="date-tag">Maio 2026</span>
+            <span class="sub">ROD como artefato central, agenda sync semanal com áreas de go-to-market</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">5.</div>
+          <div class="roadmap-item-text">
+            Rodar primeiro Planejamento de Roadmap
+            <span class="date-tag">Junho 2026</span>
+            <span class="sub">Pre-work async (apostas + intake + racional) → sync de apresentação</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="roadmap-col">
+      <div class="roadmap-col-header mp"><div class="dot"></div>Médio prazo — H2 2026</div>
+      <div class="roadmap-items">
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">1.</div>
+          <div class="roadmap-item-text">
+            Implantar rituais recorrentes
+            <span class="sub">Strategic Review, Roadmap Sync Mensal e Stream Review operando de forma estável</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">2.</div>
+          <div class="roadmap-item-text">
+            Padronizar upstream e downstream
+            <span class="sub">Processo e ferramenta para instrumentação do ciclo — do PRD ao épico no Jira</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">3.</div>
+          <div class="roadmap-item-text">
+            Publicar glossário de conceitos de produto
+            <span class="sub">Definições consensuadas de quick win, MVP, V1, épico, story e rollout — adotadas pelo time</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">4.</div>
+          <div class="roadmap-item-text">
+            Iterar sobre a primeira rodada
+            <span class="sub">Aprendizados do H1 incorporados — ajustes em artefatos, rituais e critérios de priorização</span>
+          </div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-item-num">5.</div>
+          <div class="roadmap-item-text">
+            Estabilizar governança ao longo de H2
+            <span class="sub">Sistema rodando com observabilidade e métricas de saúde do portfólio</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal overlay -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-type" id="modalType"></div>
+    <h2 id="modalTitle"></h2>
+    <div class="modal-body-text" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const data = {
+
+'pilar-1': {
+  type: 'blue', label: '',
+  title: 'Clareza e alinhamento de direção',
+  body: `<p>Garantir que todo mundo entenda o que estamos construindo, por quê e como conecta com os objetivos da Caju.</p>
+<p>Isso significa que qualquer pessoa do time — PM, engenheiro, designer — consegue responder "por que estamos fazendo isso?" sem depender de memória ou busca no Slack. As apostas estratégicas estão documentadas, o desdobramento até o épico é rastreável, e a direção é comunicada de forma consistente entre os times.</p>
+<p>Sem isso, o planejamento acontece em silos, decisões são refeitas por falta de contexto e o time gasta energia explicando o que deveria estar registrado.</p>`
+},
+
+'pilar-2': {
+  type: 'amber', label: '',
+  title: 'Planejamento e visibilidade',
+  body: `<p>Estruturar como as demandas entram, como projetos cross são coordenados, como dependências são mapeadas, como priorizamos apostas concorrentes e como os lançamentos chegam às áreas com antecedência e contexto adequados.</p>
+<p>Hoje, iniciativas são planejadas sem confrontar capacidade real, dependências aparecem só na execução — tarde demais para negociação — e o plano fica estático entre os ciclos. Novas dores não têm canal estruturado de entrada. Lançamentos chegam para CX, CS e Vendas sem lead time suficiente.</p>
+<p>O objetivo é que a empresa entre em acordo explícito sobre o que está no ciclo, o que fica de fora e por quê — e que esse acordo seja visível para toda a liderança.</p>`
+},
+
+'pilar-3': {
+  type: 'green', label: '',
+  title: 'Instrumentação do fluxo de produto',
+  body: `<p>A lógica é direta: quanto menor o lead time e maior a frequência de entrega, mais hipóteses conseguimos validar com o cliente — e melhores produtos construímos. Estudos como as Dora Metrics demonstram isso de forma consistente: velocidade e frequência de deploy têm correlação direta com sucesso em produto. Não é sobre entregar mais rápido por pressão. É sobre aprender mais rápido por design.</p>
+<p>O problema é que a maior parte dos times de produto está cega na operação. O gestor vê métricas depois do resultado — quando o dano já está feito. Não sabe onde o trabalho trava, quanto tempo leva do compromisso à entrega, nem qual proporção do que o time faz não estava planejada. Sem essa visibilidade, qualquer plano de melhoria chega atrasado.</p>
+<p>Otimizar o fluxo de trabalho — reduzir o tempo entre ideia e entrega ao cliente — é o que desbloqueia a capacidade de validar hipóteses com frequência. E para otimizar o fluxo, precisamos primeiro torná-lo visível: lead time, cycle time, WIP, throughput, trabalho não planejado. Essas métricas não são instrumentos de cobrança — são o mapa que mostra onde o sistema está congestionado e o que precisa mudar.</p>
+<p>Product Ops atua aqui construindo essa capacidade de mensuração, instrumentando as ferramentas e criando os rituais — como o Stream Review — que transformam dados de fluxo em decisões melhores e em produtos que chegam mais rápido às mãos de quem importa.</p>`
+},
+
+'ritual-estrategico': {
+  type: 'blue', label: 'Ritual · Estratégico',
+  title: 'Planejamento Anual + Strategic Review',
+  body: `<h3>O que resolve</h3>
+<p>Sem esse ritual, as Apostas ficam desconectadas da execução. Times constroem com esforço e intenção, mas sem rastreabilidade clara de volta ao que a empresa decidiu priorizar. Comprometimentos obrigatórios — regulatório, débito técnico, sustentação — ficam invisíveis no portfólio.</p>
+<h3>Planejamento Estratégico Anual</h3>
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Anual — nov/dez</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Async (etapas 1–2) → Síncrono (Offsite)</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">COMEX · Sponsors · Owners · Comitê 2 · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Apostas e Passivos aprovados · 1-pagers · Ficha da Tese final</div></div>
+</div>
+<p>Três etapas: (1) Sponsors constroem o 6-pager da Tese e mapeiam Alavancas; (2) Owners formulam 1-pagers de Aposta e Passivo de forma assíncrona; (3) Offsite síncrono — sessão de alinhamento e decisão coletiva. Todo mundo sai sabendo quais Apostas e Passivos vão para frente no ano.</p>
+<h3>Strategic Review</h3>
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semestral — abr/mai (H2)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Async (revisão) → Síncrono (~3–4h)</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">COMEX · Sponsors · Owners · Comitê 2 · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Apostas/Passivos validados H2 · Registro de decisões · Sistema atualizado</div></div>
+</div>
+<p>Verifica se as Apostas e Passivos aprovados no Planejamento Anual continuam válidos para o H2 — incorporando aprendizados do H1, mudanças de contexto e novas demandas do Intake. Mais curto e focado que o Offsite: o material já chegou maduro da revisão assíncrona.</p>
+<div class="connect-box"><strong>Alimenta:</strong> Planejamento de Roadmap (Pre-work H1 e H2) · Roadmap Sync Mensal.</div>`
+},
+
+'ritual-tatico': {
+  type: 'amber', label: 'Ritual · Tático',
+  title: 'Planejamento de Roadmap + Sync Mensal',
+  body: `<h3>O que resolve</h3>
+<p>Sem esse ritual, iniciativas são planejadas sem confrontar capacidade real, dependências aparecem só na execução e o plano congela entre os ciclos. Squads entram no semestre com overcommit não explicitado. Stakeholders perdem visibilidade e voltam ao ad hoc.</p>
+<h3>Planejamento de Roadmap</h3>
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semestral — dez (H1) e jun (H2)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Async (Pre-work) → Síncrono (Roadmap Sync ~3h)</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">PMs · TMs · Heads de Tecnologia · Stakeholders · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Iniciativas priorizadas por squad · Registro de decisões · Iniciativas no Sistema</div></div>
+</div>
+<p>Pre-work assíncrono: PMs levantam iniciativas candidatas linkadas às Apostas, estimam capacidade e declaram dependências. Product Ops consolida e prepara visão agregada. Roadmap Sync: sessão síncrona com stakeholders onde o planejamento deixa de ser proposta e vira compromisso coletivo. Nenhum squad sai com capacidade acima de 100%.</p>
+<h3>Roadmap Sync Mensal</h3>
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">~8 edições/ano · 90–120 min</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">Head de Produto · PMs · Heads de Tecnologia · Stakeholders · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Status atualizado · Mapa de riscos · Novas demandas avaliadas</div></div>
+  <div class="meta-item"><div class="meta-label">3 modos</div><div class="meta-value">Monitoramento · Revisão de riscos · Incorporação de demandas</div></div>
+</div>
+<p>Mantém o roadmap vivo entre os ciclos semestrais. Desvios são identificados antes de virarem problemas maiores. Novas demandas relevantes do Intake são avaliadas para incorporação. Cada risco sai com responsável e prazo.</p>
+<div class="connect-box"><strong>Alimentado por:</strong> Apostas e Passivos no sistema · Intake Process.<br><strong>Alimenta:</strong> próximo Sync Mensal · Planejamento de Roadmap · liderança de produto.</div>`
+},
+
+'ritual-operacional': {
+  type: 'green', label: 'Ritual · Operacional',
+  title: 'Stream Review',
+  body: `<h3>O que resolve</h3>
+<p>Sem visibilidade do fluxo, a liderança opera sem dados. Percepções subjetivas sobre baixa entrega circulam sem evidência que as confirme ou refute. Desvios entre planejado e entregue só aparecem quando o dano já está feito. O gestor de produto vê métricas depois do resultado — e os planos de correção chegam sempre atrasados.</p>
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Trimestral — Fev, Mai, Ago, Nov</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Async (preparação) → Síncrono (60–90 min)</div></div>
+  <div class="meta-item"><div class="meta-label">Donos</div><div class="meta-value">Heads de Engenharia · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Público</div><div class="meta-value">Heads de Engenharia + Heads de Produto + Product Ops + Nanda</div></div>
+</div>
+<h3>O que é</h3>
+<p>Ritual trimestral que revisa tanto o downstream (o que foi entregue, em que velocidade e com qual qualidade) quanto o upstream (o que foi comprometido, qual a proporção de trabalho não planejado, onde está o gargalo antes da execução). O objetivo não é microgerenciar — é sair da subjetividade e ter evidências que fundamentem decisões.</p>
+<h3>Métricas</h3>
+<ul>
+  <li>Lead time — do compromisso à entrega, incluindo discovery</li>
+  <li>Cycle time e throughput — velocidade de execução</li>
+  <li>WIP — trabalho em curso vs. capacidade real</li>
+  <li>Proporção de trabalho planejado vs. não planejado</li>
+  <li>Link entre épicos no Jira e iniciativas no sistema</li>
+</ul>
+<h3>Como acontece</h3>
+<ol>
+  <li>Heads de Engenharia consolidam dados do período com apoio de Product Ops</li>
+  <li>Apresentação por Product Area — throughput, lead time, planejado vs. não planejado. Comparação sempre com histórico do próprio time, nunca entre squads</li>
+  <li>Heads de Produto questionam: variações, platôs, épicos sem link com iniciativas</li>
+  <li>Encaminhamentos — sinais que exigem ação, pontos para levar à Nanda</li>
+</ol>
+<h3>Pré-condição</h3>
+<p>Pressupõe uso disciplinado do Jira upstream. Product Ops deve verificar a consistência antes de rodar em formato pleno — se necessário, começa com escopo reduzido.</p>
+<div class="connect-box"><strong>Alimentado por:</strong> uso disciplinado do Jira · link épicos → iniciativas.<br><strong>Alimenta:</strong> Roadmap Sync Mensal · Planejamento de Roadmap · liderança de produto.</div>`
+}
+
+};
+
+function openModal(id) {
+  const d = data[id];
+  if (!d) return;
+  document.getElementById('modalType').className = 'modal-type ' + d.type;
+  document.getElementById('modalType').textContent = d.label;
+  document.getElementById('modalTitle').textContent = d.title;
+  document.getElementById('modalBody').innerHTML = d.body;
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>

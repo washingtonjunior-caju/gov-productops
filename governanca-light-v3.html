@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Governança Product Ops — Caju</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F9FB;
+  --surface: #FFFFFF;
+  --surface-raised: #F0F1F4;
+  --border: #D8DBE2;
+  --border-light: #C5C9D3;
+  --text: #1A1D24;
+  --text-muted: #555B68;
+  --text-dim: #8B919E;
+  
+  /* Band colors */
+  --estrategico: #2563EB;
+  --estrategico-bg: rgba(37, 99, 235, 0.07);
+  --estrategico-border: rgba(37, 99, 235, 0.22);
+  --estrategico-glow: rgba(37, 99, 235, 0.12);
+  
+  --tatico: #D97706;
+  --tatico-bg: rgba(217, 119, 6, 0.07);
+  --tatico-border: rgba(217, 119, 6, 0.22);
+  --tatico-glow: rgba(217, 119, 6, 0.12);
+  
+  --operacional: #059669;
+  --operacional-bg: rgba(5, 150, 105, 0.07);
+  --operacional-border: rgba(5, 150, 105, 0.22);
+  --operacional-glow: rgba(5, 150, 105, 0.12);
+  
+  --lancamentos: #DC2626;
+  --lancamentos-bg: rgba(220, 38, 38, 0.07);
+  --lancamentos-border: rgba(220, 38, 38, 0.22);
+  
+  --processo: #7C3AED;
+  --processo-bg: rgba(124, 58, 237, 0.06);
+  --processo-border: rgba(124, 58, 237, 0.20);
+  
+  --externo: #6B7280;
+  --externo-bg: rgba(107, 114, 128, 0.08);
+  --externo-border: rgba(107, 114, 128, 0.25);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: auto;
+  min-height: 100vh;
+}
+
+.page-header {
+  padding: 32px 40px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.page-header h1 span {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 20px;
+  padding: 0 40px 24px;
+  flex-wrap: wrap;
+  position: sticky;
+  left: 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1.5px solid;
+}
+
+.legend-swatch.ritual { background: var(--estrategico-bg); border-color: var(--estrategico); }
+.legend-swatch.artefato { background: var(--surface-raised); border-color: var(--border-light); border-style: dashed; }
+.legend-swatch.processo { background: var(--processo-bg); border-color: var(--processo); border-style: dotted; }
+.legend-swatch.externo { background: var(--externo-bg); border-color: var(--externo); }
+
+/* Main timeline container */
+.timeline-wrap {
+  padding: 0 40px 60px;
+  overflow-x: auto;
+}
+
+.timeline {
+  min-width: 2800px;
+  position: relative;
+}
+
+/* Month header row — 36 half-month columns for precise positioning */
+.month-header {
+  display: grid;
+  grid-template-columns: 140px repeat(36, 1fr);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: var(--bg);
+}
+
+.month-header .label-col {
+  padding: 6px 12px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  border-right: 1px solid var(--border);
+}
+
+.month-header .semester-group {
+  display: contents;
+}
+
+.month-cell {
+  text-align: center;
+  padding: 10px 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-right: 1px solid rgba(0,0,0,0.08);
+  position: relative;
+  grid-column: span 2;
+}
+
+.month-cell.sem-start {
+  border-left: 1px solid var(--border-light);
+}
+
+.semester-label {
+  display: grid;
+  grid-template-columns: 140px repeat(36, 1fr);
+  background: var(--surface);
+}
+
+.semester-label .label-col {
+  border-right: 1px solid var(--border);
+}
+
+.sem-block {
+  text-align: center;
+  padding: 4px 0;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-right: 1px solid rgba(0,0,0,0.08);
+}
+
+.sem-block.h2-prev { grid-column: span 12; background: rgba(59,130,246,0.04); }
+.sem-block.q1 { grid-column: span 6; }
+.sem-block.q2 { grid-column: span 6; }
+.sem-block.q3 { grid-column: span 6; }
+.sem-block.q4 { grid-column: span 6; }
+
+/* Band rows */
+.band {
+  position: relative;
+  border-bottom: 1px solid var(--border);
+}
+
+.band-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  z-index: 2;
+  border-right: 1px solid var(--border);
+}
+
+.band-label.estrategico { color: var(--estrategico); background: var(--estrategico-bg); border-right-color: var(--estrategico-border); }
+.band-label.tatico { color: var(--tatico); background: var(--tatico-bg); border-right-color: var(--tatico-border); }
+.band-label.operacional { color: var(--operacional); background: var(--operacional-bg); border-right-color: var(--operacional-border); }
+
+.band-content {
+  margin-left: 140px;
+  position: relative;
+  min-height: 100px;
+}
+
+
+/* Rows inside bands */
+.band-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(36, 1fr);
+  min-height: 56px;
+  align-items: center;
+  z-index: 1;
+}
+
+.band-row + .band-row {
+  border-top: 1px solid rgba(0,0,0,0.04);
+}
+
+/* Block items */
+.block {
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  line-height: 1.35;
+  z-index: 1;
+  margin: 4px 3px;
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.block:hover {
+  transform: translateY(-1px);
+  z-index: 5;
+}
+
+.block .block-title {
+  font-weight: 600;
+  font-size: 10.5px;
+  display: block;
+}
+
+.block .block-sub {
+  font-size: 9px;
+  opacity: 0.7;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Block types */
+.block.ritual-estrategico {
+  background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.06));
+  border: 1px solid var(--estrategico-border);
+  color: #1e40af;
+}
+.block.ritual-estrategico:hover {
+  border-color: var(--estrategico);
+  box-shadow: 0 4px 20px var(--estrategico-glow);
+}
+
+.block.ritual-tatico {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.06));
+  border: 1px solid var(--tatico-border);
+  color: #92400e;
+}
+.block.ritual-tatico:hover {
+  border-color: var(--tatico);
+  box-shadow: 0 4px 20px var(--tatico-glow);
+}
+
+.block.ritual-operacional {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.06));
+  border: 1px solid var(--operacional-border);
+  color: #065f46;
+}
+.block.ritual-operacional:hover {
+  border-color: var(--operacional);
+  box-shadow: 0 4px 20px var(--operacional-glow);
+}
+
+.block.lancamento {
+  background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06));
+  border: 1px solid var(--lancamentos-border);
+  color: #991b1b;
+}
+.block.lancamento:hover {
+  border-color: var(--lancamentos);
+  box-shadow: 0 4px 20px rgba(239,68,68,0.25);
+}
+
+.block.artefato {
+  background: var(--surface-raised);
+  border: 1px dashed var(--border-light);
+  color: var(--text-muted);
+}
+.block.artefato:hover {
+  border-color: var(--text-muted);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.block.processo {
+  background: var(--processo-bg);
+  border: 1px dotted var(--processo-border);
+  color: #5b21b6;
+}
+.block.processo:hover {
+  border-color: var(--processo);
+  box-shadow: 0 4px 16px rgba(139,92,246,0.2);
+}
+
+.block.externo {
+  background: var(--externo-bg);
+  border: 1px solid var(--externo-border);
+  color: #4B5563;
+}
+.block.externo:hover {
+  border-color: var(--externo);
+}
+
+/* Repeating weekly blocks */
+.block.weekly {
+  font-size: 9px;
+  min-height: 32px;
+  padding: 4px 6px;
+}
+
+/* Sync mensal small blocks */
+.block.sync-mensal {
+  font-size: 8.5px;
+  min-height: 30px;
+  padding: 3px 5px;
+  text-align: center;
+}
+
+/* Artefato sub-row */
+.artefato-row {
+  display: grid;
+  grid-template-columns: repeat(36, 1fr);
+  min-height: 38px;
+  align-items: start;
+  z-index: 1;
+  position: relative;
+  border-top: 1px solid rgba(0,0,0,0.04);
+  padding-top: 4px;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 40px;
+  overflow-y: auto;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 720px;
+  width: 100%;
+  padding: 0;
+  position: relative;
+  animation: modalIn 0.25s ease;
+  margin-bottom: 40px;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header .modal-type {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.modal-header .modal-type.estrategico { color: var(--estrategico); }
+.modal-header .modal-type.tatico { color: var(--tatico); }
+.modal-header .modal-type.operacional { color: var(--operacional); }
+.modal-header .modal-type.lancamento { color: var(--lancamentos); }
+.modal-header .modal-type.processo { color: var(--processo); }
+.modal-header .modal-type.externo { color: var(--externo); }
+
+.modal-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.15s;
+}
+
+.modal-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 20px 28px 28px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-body h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 20px;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.modal-body h3:first-child { margin-top: 0; }
+
+.modal-body p { margin-bottom: 10px; }
+
+.modal-body ul {
+  margin: 6px 0 10px 18px;
+}
+
+.modal-body li {
+  margin-bottom: 4px;
+}
+
+.modal-body .meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-body .meta-item {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.modal-body .meta-item .meta-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+
+.modal-body .meta-item .meta-value {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.modal-body .connect-box {
+  background: rgba(139,92,246,0.06);
+  border: 1px solid rgba(139,92,246,0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  font-size: 12.5px;
+}
+
+.modal-body .connect-box strong {
+  color: #5b21b6;
+}
+
+/* Separator inside band */
+.band-separator {
+  height: 1px;
+  background: rgba(0,0,0,0.06);
+  margin: 0;
+}
+
+/* Sub-labels for rows */
+.row-label {
+  position: absolute;
+  left: -130px;
+  width: 120px;
+  text-align: right;
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-right: 8px;
+}
+
+/* Continuous process bar */
+.process-bar {
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 4px 3px;
+  transition: all 0.2s;
+}
+
+.process-bar:hover {
+  transform: translateY(-1px);
+}
+
+.process-bar.intake {
+  background: var(--processo-bg);
+  border: 1px dotted var(--processo-border);
+  color: #5b21b6;
+}
+.process-bar.intake:hover {
+  border-color: var(--processo);
+}
+
+.process-bar.processo-continuo {
+  background: var(--processo-bg);
+  border: 1px dotted var(--processo-border);
+  color: #5b21b6;
+}
+.process-bar.processo-continuo:hover {
+  border-color: var(--processo);
+}
+
+.process-bar.ciclo-dev {
+  background: var(--processo-bg);
+  border: 1px dotted var(--processo-border);
+  color: #5b21b6;
+}
+.process-bar.ciclo-dev:hover {
+  border-color: var(--processo);
+}
+
+.process-bar.budget {
+  background: var(--externo-bg);
+  border: 1px solid var(--externo-border);
+  color: #4B5563;
+}
+.process-bar.budget:hover {
+  border-color: var(--externo);
+}
+
+/* Inline artefato tags */
+.artefato-tag {
+  display: inline-flex;
+  align-items: center;
+  background: var(--surface-raised);
+  border: 1px dashed var(--border-light);
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 7px;
+  color: var(--text-muted);
+  margin: 1px 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.artefato-tag:hover {
+  border-color: var(--text-muted);
+  background: var(--border);
+}
+
+/* Scroll hint */
+.scroll-hint {
+  position: sticky;
+  left: 0;
+  padding: 0 40px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scroll-hint svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+}
+
+/* ── Intro Cards ─────────────────────────────────── */
+.intro-section {
+  position: sticky;
+  left: 0;
+  padding: 0 40px 32px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.intro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 12px 12px 0 0;
+  transition: opacity 0.2s;
+}
+
+.intro-card.card-1::before { background: var(--estrategico); }
+.intro-card.card-2::before { background: var(--tatico); }
+.intro-card.card-3::before { background: var(--operacional); }
+
+.intro-card:hover {
+  border-color: var(--border-light);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+  transform: translateY(-2px);
+}
+
+.intro-card-tag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.intro-card.card-1 .intro-card-tag { color: var(--estrategico); }
+.intro-card.card-2 .intro-card-tag { color: var(--tatico); }
+.intro-card.card-3 .intro-card-tag { color: var(--operacional); }
+
+.intro-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.intro-card-body {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.intro-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: color 0.15s;
+}
+
+.intro-card:hover .intro-card-cta { color: var(--text-muted); }
+
+.intro-card.card-1:hover .intro-card-cta { color: var(--estrategico); }
+.intro-card.card-2:hover .intro-card-cta { color: var(--tatico); }
+.intro-card.card-3:hover .intro-card-cta { color: var(--operacional); }
+
+.intro-card-cta svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.15s;
+}
+
+.intro-card:hover .intro-card-cta svg {
+  transform: translateX(3px);
+}
+
+/* Intro modal — text-heavy variant */
+.modal-body.intro-body {
+  font-size: 14px;
+  line-height: 1.75;
+  max-height: 75vh;
+}
+
+.modal-body.intro-body h3 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 28px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-body.intro-body h3:first-child { margin-top: 0; }
+
+.modal-body.intro-body p {
+  margin-bottom: 14px;
+  color: var(--text-muted);
+}
+
+.modal-body.intro-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.modal-body.intro-body .result-item {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.modal-body.intro-body .result-item strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.modal-body.intro-body .result-item p {
+  margin-bottom: 0;
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Governança Product Ops <span>— Caju</span></h1>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch ritual"></div>Ritual</div>
+  <div class="legend-item"><div class="legend-swatch artefato"></div>Artefato</div>
+  <div class="legend-item"><div class="legend-swatch processo"></div>Processo Contínuo</div>
+  <div class="legend-item"><div class="legend-swatch externo"></div>Processo Externo</div>
+  <div class="legend-item" style="margin-left:12px; opacity:0.6;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+    Clique em qualquer bloco para detalhes
+  </div>
+</div>
+
+<div class="intro-section">
+
+  <!-- Card 1 — Por que essa governança existe -->
+  <div class="intro-card card-1" onclick="openIntroModal('intro-1')">
+    <div class="intro-card-tag">Visão Geral</div>
+    <div class="intro-card-title">Por que essa governança existe</div>
+    <div class="intro-card-body">O sistema operacional que conecta estratégia e execução — da Tese ao épico, com rastreabilidade, rituais e artefatos que mantêm o time orientado a impacto.</div>
+    <div class="intro-card-cta">Ler mais <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+  </div>
+
+  <!-- Card 2 — Quais problemas resolve -->
+  <div class="intro-card card-2" onclick="openIntroModal('intro-2')">
+    <div class="intro-card-tag">Diagnóstico</div>
+    <div class="intro-card-title">Quais problemas buscamos resolver</div>
+    <div class="intro-card-body">Três dimensões concretas: comprometimento estratégico sem fio condutor, planejamento tático sem visibilidade real de capacidade e dependências, e informação dispersa que impede alinhamento.</div>
+    <div class="intro-card-cta">Ler mais <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+  </div>
+
+  <!-- Card 3 — Resultados esperados -->
+  <div class="intro-card card-3" onclick="openIntroModal('intro-3')">
+    <div class="intro-card-tag">Resultados</div>
+    <div class="intro-card-title">O que esperamos obter</div>
+    <div class="intro-card-body">No curto prazo, rastreabilidade, priorização alinhada e lançamentos coordenados. No médio prazo, priorização como competência organizacional e capacidade de replanejar com velocidade.</div>
+    <div class="intro-card-cta">Ler mais <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+  </div>
+
+</div>
+
+<div class="scroll-hint">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  Role horizontalmente para ver o cronograma completo
+</div>
+
+<div class="timeline-wrap">
+<div class="timeline">
+
+<!-- Semester labels -->
+<div class="semester-label">
+  <div class="label-col"></div>
+  <div class="sem-block h2-prev" style="border-right:1px solid var(--border-light)">2º Semestre (Ano Anterior)</div>
+  <div class="sem-block q1">1º Tri</div>
+  <div class="sem-block q2">2º Tri</div>
+  <div class="sem-block q3">3º Tri</div>
+  <div class="sem-block q4">4º Tri</div>
+</div>
+
+<!-- Month headers -->
+<div class="month-header">
+  <div class="label-col"></div>
+  <div class="month-cell">Jul</div>
+  <div class="month-cell">Ago</div>
+  <div class="month-cell sem-start">Set</div>
+  <div class="month-cell">Out</div>
+  <div class="month-cell">Nov</div>
+  <div class="month-cell sem-start" style="border-left-color:var(--border-light)">Dez</div>
+  <div class="month-cell sem-start">Jan</div>
+  <div class="month-cell">Fev</div>
+  <div class="month-cell">Mar</div>
+  <div class="month-cell sem-start">Abr</div>
+  <div class="month-cell">Mai</div>
+  <div class="month-cell">Jun</div>
+  <div class="month-cell sem-start">Jul</div>
+  <div class="month-cell">Ago</div>
+  <div class="month-cell">Set</div>
+  <div class="month-cell sem-start">Out</div>
+  <div class="month-cell">Nov</div>
+  <div class="month-cell">Dez</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- FAIXA ESTRATÉGICA -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="band">
+  <div class="band-label estrategico">Estratégico</div>
+  <div class="band-content">
+
+
+    <!-- Cols: Jul=1-2  Ago=3-4  Set=5-6  Out=7-8  Nov=9-10  Dez=11-12
+               Jan=13-14 Fev=15-16 Mar=17-18 Abr=19-20 Mai=21-22 Jun=23-24
+               Jul=25-26 Ago=27-28 Set=29-30 Out=31-32 Nov=33-34 Dez=35-36 -->
+
+    <!-- ── Budget ── -->
+    <div class="band-row" style="min-height:32px">
+      <div style="grid-column: 6/10; display:flex">
+        <div class="process-bar budget" style="flex:1" onclick="openModal('budget')">Budget</div>
+      </div>
+      <div style="grid-column: 30/34; display:flex">
+        <div class="process-bar budget" style="flex:1" onclick="openModal('budget')">Budget</div>
+      </div>
+    </div>
+
+    <!-- ── Etapa 1: PEA E1(6-9) | SR E1(20-22) | PEA E1 curr(30-33) ── -->
+    <div class="band-row">
+      <div style="grid-column: 6/9; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('pea-etapa1')">
+          <span class="block-title">Planej. Estratégico Anual — Etapa 1</span>
+          <span class="block-sub" style="font-size:7.5px">COMEX + Sponsor + Product Ops</span>
+        </div>
+      </div>
+      <div style="grid-column: 20/22; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('sr-etapa1')">
+          <span class="block-title">Strategic Review — Etapa 1</span>
+          <span class="block-sub" style="font-size:7.5px">Sponsor + Owner + Product Ops</span>
+        </div>
+      </div>
+      <div style="grid-column: 30/33; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('pea-etapa1')">
+          <span class="block-title">Planej. Estratégico Anual — Etapa 1</span>
+          <span class="block-sub" style="font-size:7.5px">COMEX + Sponsor + Product Ops</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Etapa 2: PEA E2(9-10) | SR E2(22-23) | PEA E2 curr(33-34) ── -->
+    <div class="band-row">
+      <div style="grid-column: 9/10; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('pea-etapa2')">
+          <span class="block-title">Etapa 2</span>
+          <span class="block-sub" style="font-size:7.5px">Sponsor + Owner</span>
+        </div>
+      </div>
+      <div style="grid-column: 22/23; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('sr-etapa2')">
+          <span class="block-title">Etapa 2</span>
+          <span class="block-sub" style="font-size:7.5px">Comitê 2+</span>
+        </div>
+      </div>
+      <div style="grid-column: 33/34; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('pea-etapa2')">
+          <span class="block-title">Etapa 2</span>
+          <span class="block-sub" style="font-size:7.5px">Sponsor + Owner</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Etapa 3 / Offsite: PEA E3(10-11) | PEA E3 curr(34-35) ── -->
+    <div class="band-row">
+      <div style="grid-column: 10/11; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('pea-etapa3')">
+          <span class="block-title">Offsite</span>
+          <span class="block-sub" style="font-size:7.5px">Comitê 2+</span>
+        </div>
+      </div>
+      <div style="grid-column: 34/35; display:flex">
+        <div class="block ritual-estrategico" style="flex:1" onclick="openModal('pea-etapa3')">
+          <span class="block-title">Offsite</span>
+          <span class="block-sub" style="font-size:7.5px">Comitê 2+</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Artefatos — one row, each group left-aligned to its ritual's start column ── -->
+    <div class="artefato-row" style="min-height:44px">
+      <!-- PEA prev E1 artefatos: start at col 6 -->
+      <div style="grid-column: 6/9; display:flex; gap:2px; flex-wrap:wrap; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-6pager')">6-pager Tese</span>
+      </div>
+      <!-- PEA prev E2 artefatos: stacked vertically at col 9 -->
+      <div style="grid-column: 9/10; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-ficha-tese')">Ficha Tese</span>
+        <span class="artefato-tag" onclick="openModal('art-1pager-aposta')">1-pg Aposta</span>
+        <span class="artefato-tag" onclick="openModal('art-1pager-passivo')">1-pg Passivo</span>
+      </div>
+      <!-- PEA prev E3 artefatos: aligned to Offsite col 10 -->
+      <div style="grid-column: 10/11; display:flex; gap:2px; flex-wrap:wrap; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-sistema-apostas')">No Sistema</span>
+      </div>
+
+      <!-- SR E1 artefatos: stacked vertically at col 20 -->
+      <div style="grid-column: 20/22; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-1pager-aposta')">1-pg Aposta</span>
+        <span class="artefato-tag" onclick="openModal('art-1pager-passivo')">1-pg Passivo</span>
+      </div>
+      <!-- SR E2 artefatos: start at col 22 -->
+      <div style="grid-column: 22/23; display:flex; gap:2px; flex-wrap:wrap; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-sistema-apostas')">No Sistema</span>
+      </div>
+
+      <!-- PEA curr E1 artefatos: start at col 30 -->
+      <div style="grid-column: 30/33; display:flex; gap:2px; flex-wrap:wrap; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-6pager')">6-pager Tese</span>
+      </div>
+      <!-- PEA curr E2 artefatos: stacked vertically at col 33 -->
+      <div style="grid-column: 33/34; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-ficha-tese')">Ficha Tese</span>
+        <span class="artefato-tag" onclick="openModal('art-1pager-aposta')">1-pg Aposta</span>
+        <span class="artefato-tag" onclick="openModal('art-1pager-passivo')">1-pg Passivo</span>
+      </div>
+      <!-- PEA curr E3 artefatos: aligned to Offsite col 34 -->
+      <div style="grid-column: 34/35; display:flex; gap:2px; flex-wrap:wrap; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-sistema-apostas')">No Sistema</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- FAIXA TÁTICA -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="band">
+  <div class="band-label tatico">Tático</div>
+  <div class="band-content">
+
+
+    <!-- ── Intake Process — contínuo (Jan→Dez) ── -->
+    <div class="band-row" style="min-height:32px">
+      <div style="grid-column: 13/37; display:flex">
+        <div class="process-bar processo-continuo" style="flex:1" onclick="openModal('intake')">Intake Process — contínuo</div>
+      </div>
+    </div>
+
+    <!-- ── Planej. Roadmap — Pre-work (Etapa 1) ── -->
+    <div class="band-row">
+      <div style="grid-column: 11/13; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('roadmap-prework')">
+          <span class="block-title">Planej. Roadmap — Pre-work</span>
+          <span class="block-sub" style="font-size:7.5px">Heads Tech + PM/TM</span>
+        </div>
+      </div>
+      <div style="grid-column: 23/24; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('roadmap-prework')">
+          <span class="block-title">Pre-work</span>
+          <span class="block-sub" style="font-size:7.5px">Heads Tech + PM/TM</span>
+        </div>
+      </div>
+      <div style="grid-column: 35/37; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('roadmap-prework')">
+          <span class="block-title">Pre-work</span>
+          <span class="block-sub" style="font-size:7.5px">Heads Tech + PM/TM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Roadmap Sync (Etapa 2) ── -->
+    <div class="band-row">
+      <div style="grid-column: 13/15; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('roadmap-sync')">
+          <span class="block-title">Roadmap Sync</span>
+          <span class="block-sub" style="font-size:7.5px">PM/TM + Stakeholders</span>
+        </div>
+      </div>
+      <div style="grid-column: 24/25; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('roadmap-sync')">
+          <span class="block-title">Roadmap Sync</span>
+          <span class="block-sub" style="font-size:7.5px">PM/TM + SH</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Artefatos Planej. Roadmap ── -->
+    <div class="artefato-row" style="min-height:34px">
+      <div style="grid-column: 11/13; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-product-pitch')">Product Pitch</span>
+      </div>
+      <div style="grid-column: 13/15; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-iniciativas-sistema')">Iniciativas no Sistema</span>
+      </div>
+      <div style="grid-column: 23/24; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-product-pitch')">Product Pitch</span>
+      </div>
+      <div style="grid-column: 24/25; display:flex; flex-direction:column; gap:1px; padding:2px 3px; align-items:flex-start;">
+        <span class="artefato-tag" onclick="openModal('art-iniciativas-sistema')">No Sistema</span>
+      </div>
+    </div>
+
+    <!-- ── Roadmap Sync Mensal ── -->
+    <div class="band-row">
+      <div style="grid-column: 15/17; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 17/19; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 19/21; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 21/23; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 25/27; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 27/29; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 29/31; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 31/33; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+      <div style="grid-column: 33/35; display:flex">
+        <div class="block ritual-tatico" style="flex:1" onclick="openModal('sync-mensal')"><span class="block-title">Sync Mensal</span><span class="block-sub" style="font-size:7.5px">PM/TM + SH</span></div>
+      </div>
+    </div>
+
+    <!-- ── Artefatos Sync Mensal ── -->
+    <div class="artefato-row" style="min-height:22px">
+      <div style="grid-column: 15/35; display:flex; gap:2px; padding:2px 3px; align-items:flex-start;">
+        <span style="font-size:7px; color:var(--text-dim); margin-right:1px;">Cada sync atualiza →</span>
+        <span class="artefato-tag" onclick="openModal('art-iniciativas-sistema')">No Sistema</span>
+      </div>
+    </div>
+
+    <!-- ═══ LANÇAMENTOS ═══ -->
+
+    <!-- ── Lançamentos — contínuo (Jan→Dez) ── -->
+    <div class="band-row" style="min-height:32px">
+      <div style="grid-column: 13/37; display:flex">
+        <div class="process-bar processo-continuo" style="flex:1" onclick="openModal('sync-lancamentos')">Lançamentos — contínuo</div>
+      </div>
+    </div>
+
+    <!-- ── ROD — artefato contínuo, barra de fora a fora alinhada a Lançamentos ── -->
+    <div class="artefato-row" style="min-height:22px; border-top:none;">
+      <div style="grid-column: 13/37; display:flex; padding:0 3px;">
+        <span class="artefato-tag" onclick="openModal('art-rod')" style="flex:1; text-align:center; justify-content:center; border-color:var(--processo-border);">ROD — Release Operational Document</span>
+      </div>
+    </div>
+
+    <!-- ── Sync Semanal de Lançamentos (Jan→Dez) ── -->
+    <div class="band-row" style="min-height:40px">
+      <div style="grid-column: 13/37; display:flex; gap:2px; padding: 0 2px;">
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+        <div class="block weekly ritual-tatico" style="flex:1" onclick="openModal('sync-lancamentos')"><span class="block-title">Sync Semanal Lanç.</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- FAIXA OPERACIONAL -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="band">
+  <div class="band-label operacional">Operacional</div>
+  <div class="band-content">
+
+
+    <!-- ── Ciclo de Desenvolvimento de Produto — contínuo (Jan→Dez) ── -->
+    <div class="band-row" style="min-height:32px">
+      <div style="grid-column: 13/37; display:flex">
+        <div class="process-bar processo-continuo" style="flex:1" onclick="openModal('ciclo-dev')">Ciclo de Desenvolvimento de Produto — contínuo</div>
+      </div>
+    </div>
+
+    <!-- ── PRD + Épicos no Sistema — artefatos contínuos, barras de fora a fora empilhadas ── -->
+    <div class="artefato-row" style="min-height:34px; border-top:none;">
+      <div style="grid-column: 13/37; display:flex; flex-direction:column; gap:1px; padding:1px 3px; align-items:stretch;">
+        <span class="artefato-tag" onclick="openModal('art-prd')" style="justify-content:center; text-align:center; border-color:var(--processo-border);">PRD — Product Requirements Document</span>
+        <span class="artefato-tag" onclick="openModal('art-epicos-sistema')" style="justify-content:center; text-align:center; border-color:var(--processo-border);">Épicos no Sistema</span>
+      </div>
+    </div>
+
+    <!-- ── Dev Review — trimestral: Fev(15-16), Mai(21-22), Ago(27-28), Nov(33-34) ── -->
+    <div class="band-row">
+      <div style="grid-column: 15/17; display:flex">
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
+          <span class="block-title">Dev Review</span>
+          <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
+        </div>
+      </div>
+      <div style="grid-column: 21/23; display:flex">
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
+          <span class="block-title">Dev Review</span>
+          <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
+        </div>
+      </div>
+      <div style="grid-column: 27/29; display:flex">
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
+          <span class="block-title">Dev Review</span>
+          <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
+        </div>
+      </div>
+      <div style="grid-column: 33/35; display:flex">
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
+          <span class="block-title">Dev Review</span>
+          <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /timeline -->
+</div><!-- /timeline-wrap -->
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- MODAL -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-header">
+      <div class="modal-type" id="modalType"></div>
+      <h2 id="modalTitle"></h2>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Intro modal -->
+<div class="modal-overlay" id="introModalOverlay" onclick="closeIntroModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeIntroModal()">✕</button>
+    <div class="modal-header">
+      <div class="modal-type" id="introModalType"></div>
+      <h2 id="introModalTitle"></h2>
+    </div>
+    <div class="modal-body intro-body" id="introModalBody"></div>
+  </div>
+</div>
+
+<script>
+const data = {
+
+// ─── RITUAIS ─────────────────────────────────────
+
+'pea-etapa1': {
+  type: 'estrategico',
+  typeLabel: 'Ritual · Estratégico — Etapa 1 de 3',
+  title: 'Planejamento Estratégico Anual — Construção de Tese, North Star e Alavancas',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Anual — meados de set até final de out (~5 semanas)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">COMEX (input) · Sponsors de Tese (executores) · Product Ops (templates, follow-up, consolidação)</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">6-pager de Tese (Sponsor) · Ficha da Tese parcial (Product Ops)</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Garantir que cada Tese de Produto tenha uma narrativa estratégica clara, um indicador de sucesso definido (North Star) e os vetores de ação identificados (Alavancas) — antes de qualquer discussão sobre o que fazer. Sem essa base, as apostas não têm fundamento e o planejamento tático perde referência estratégica.</p>
+<h3>O que é</h3>
+<p>Exercício assíncrono conduzido pelos Sponsors de cada Tese, com suporte de Product Ops, para construir ou atualizar os documentos fundacionais do planejamento anual. Corre em paralelo ao processo de Budget.</p>
+<h3>Insumos necessários</h3>
+<ul>
+  <li>Teses e resultados do ano anterior</li>
+  <li>Output consolidado do Intake Process do ano: dores recorrentes, demandas regulatórias, dados de mercado</li>
+  <li>Direcionamento estratégico do COMEX para o próximo ano</li>
+  <li>Budget em construção como referência de restrição (não precisa estar fechado)</li>
+</ul>
+<h3>Como acontece</h3>
+<ol>
+  <li>Product Ops disponibiliza o template de 6-pager e de Ficha da Tese, e consolida os insumos disponíveis para cada Sponsor</li>
+  <li>Cada Sponsor, com as pessoas de domínio relevantes da sua área, constrói ou atualiza o 6-pager da Tese — revisando narrativa, confirmando ou ajustando a North Star, e propondo as Alavancas</li>
+  <li>Product Ops faz follow-up ativo e garante entrega até o prazo</li>
+</ol>
+<h3>O que produz</h3>
+<ul>
+  <li><strong>6-pager de Tese</strong> → responsável: Sponsor</li>
+  <li><strong>Ficha da Tese — parcial</strong> (Tese, North Star e Alavancas preenchidos; Apostas e Passivos serão completados na Etapa 2) → responsável: Product Ops, a partir do 6-pager entregue</li>
+</ul>
+<h3>Tempo estimado</h3>
+<p>Sponsor: 4–8h de trabalho assíncrono ao longo das 5 semanas. Product Ops: 2h por Tese (template, follow-up, consolidação da Ficha).</p>
+<h3>Impacto se deixar de existir</h3>
+<p>A Etapa 2 acontece sem base validada — Apostas e Passivos ficam soltos, sem rastreabilidade à North Star e sem clareza sobre quais vetores devem ser movidos. O planejamento tático perde referência estratégica e a priorização de iniciativas vira exercício de opinião, não de estratégia.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os Sponsors entregaram o 6-pager no prazo. Cada Tese tem North Star definida e pelo menos 3 Alavancas identificadas e validadas internamente pelo Sponsor. Product Ops consegue construir a Ficha da Tese parcial sem ambiguidades.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Intake Process (insumos do ano), direcionamento COMEX, resultados do ano anterior, Budget em construção.<br>Alimenta: Planejamento Estratégico Anual — Etapa 2.</div>
+`},
+
+'pea-etapa2': {
+  type: 'estrategico',
+  typeLabel: 'Ritual · Estratégico — Etapa 2 de 3',
+  title: 'Planejamento Estratégico Anual — Construção de Apostas e Passivos',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Anual — última semana de out até meados de nov (~3 semanas)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">Sponsors de Tese · Owners das Apostas e Passivos · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">1-pager de Aposta · 1-pager de Passivo · Ficha da Tese completa</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Transformar as Alavancas definidas na Etapa 1 em direções concretas de ação para o ano — as Apostas — e mapear os compromissos obrigatórios que consomem capacidade sem serem apostas estratégicas — os Passivos. É o momento em que a estratégia ganha forma executável, com justificativa, impacto estimado e dono definido para cada item.</p>
+<h3>Insumos necessários</h3>
+<ul>
+  <li>6-pager de Tese e Ficha da Tese parcial (Etapa 1)</li>
+  <li>Diagnóstico por Alavanca: respostas às perguntas "Por que não conseguimos mover essa alavanca como gostaríamos?" e "Quais oportunidades enxergamos?"</li>
+  <li>Output do Intake Process do ano</li>
+  <li>Budget em construção como referência de restrição de capacidade</li>
+</ul>
+<h3>Como acontece</h3>
+<ol>
+  <li>Sponsor define quais serão os Owners de cada Aposta e Passivo e alinha expectativas de entrega</li>
+  <li>Cada Owner constrói o 1-pager da sua Aposta ou Passivo de forma assíncrona, seguindo o template definido por Product Ops</li>
+  <li>Sponsor revisa os 1-pagers da sua Tese verificando rastreabilidade (Alavanca → Aposta) e consistência do conjunto</li>
+  <li>Product Ops faz pré-leitura de todos os 1-pagers antes do Offsite, antecipando pontos de tensão entre Teses e itens que precisam de ajuste</li>
+</ol>
+<h3>O que produz</h3>
+<ul>
+  <li><strong>1-pager de Aposta</strong> — um por Aposta, com diagnóstico, justificativa, impacto estimado e indicador operacional → responsável: Owner, revisado pelo Sponsor</li>
+  <li><strong>1-pager de Passivo</strong> — um por item de Passivo, com escopo, prazo e capacidade estimada → responsável: Owner, revisado pelo Sponsor</li>
+  <li><strong>Ficha da Tese — completa</strong> — preenchida com Apostas e Passivos finalizados → responsável: Product Ops</li>
+</ul>
+<h3>Tempo estimado</h3>
+<p>Owner: 3–6h por 1-pager. Sponsor: 2–4h de revisão do conjunto da Tese. Product Ops: 1–2h por Tese para pré-leitura e consolidação.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>O Offsite acontece sem material preparado — vira uma reunião de brainstorming em vez de uma sessão de decisão. Apostas chegam sem justificativa, sem impacto estimado e sem Owner definido, tornando impossível priorizar com critério.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os 1-pagers entregues no prazo, com diagnóstico, justificativa articulada e impacto estimado preenchidos. Sponsor consegue defender o conjunto da sua Tese sem lacunas. Product Ops não identifica itens com rastreabilidade quebrada ou conflitos críticos não sinalizados.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Etapa 1 (Ficha da Tese parcial + 6-pager), Intake Process, Budget em construção.<br>Alimenta: Etapa 3 (Offsite).</div>
+`},
+
+'pea-etapa3': {
+  type: 'estrategico',
+  typeLabel: 'Ritual · Estratégico — Etapa 3 de 3',
+  title: 'Planejamento Estratégico Anual — Offsite de Alinhamento e Decisão',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Anual — segunda quinzena de novembro</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Síncrono (~6-7h)</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">COMEX · Sponsors · Owners · Comitê 2 · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Apostas/Passivos aprovados · Registro de decisões · 1-pagers atualizados · Apostas/Passivos no Sistema · Ficha da Tese final</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Transformar o trabalho assíncrono das Etapas 1 e 2 em decisões coletivas validadas. É o único momento síncrono do Planejamento Estratégico Anual — e seu propósito não é construir, é alinhar e decidir. Todo mundo sai sabendo quais Apostas e Passivos vão para frente no ano.</p>
+<h3>O que é</h3>
+<p>Momento síncrono do Planejamento Estratégico Anual — pode ser um dia de reunião, um offsite de dois dias com atividades de team building, ou qualquer formato que o contexto do ano permitir. O que está descrito aqui é a parte dedicada ao desdobramento estratégico.</p>
+<h3>Insumos necessários</h3>
+<ul>
+  <li>Todos os 1-pagers de Aposta e Passivo entregues e pré-lidos</li>
+  <li>Ficha da Tese completa de cada Tese</li>
+  <li>Pré-leitura obrigatória de todos os participantes</li>
+  <li>Síntese de pontos de tensão preparada por Product Ops</li>
+</ul>
+<h3>Como acontece</h3>
+<ol>
+  <li><strong>Abertura</strong> — CEO ou CPO contextualiza o ano: direcionamento estratégico, restrições financeiras (Budget fechado), janelas de oportunidade — 30 min</li>
+  <li><strong>Bloco por Tese</strong> — Sponsor apresenta Alavancas e percorre os 1-pagers. Grupo estresa justificativas e impactos. COMEX e Comitê 2 questionam. Ao final, grupo seleciona e hierarquiza — ~90 min por Tese</li>
+  <li><strong>Visão cross-tese</strong> — conflitos de capacidade entre Teses, dependências e hierarquia em trade-offs — 45 min</li>
+  <li><strong>Validação formal</strong> — COMEX valida o conjunto. Product Ops lê as decisões em voz alta para confirmar alinhamento — 15 min</li>
+  <li><strong>Comunicação pós-evento</strong> — Product Ops publica o registro de decisões para toda a audiência relevante</li>
+</ol>
+<h3>Tempo estimado</h3>
+<p>Bloco de desdobramento: ~6–7h. Preparação Product Ops: 4–6h. Pós-evento: 2–3h Product Ops, 1–2h por Owner.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>As Apostas e Passivos ficam como propostas assíncronas nunca formalmente validadas. Conflitos entre Teses só aparecem na execução. O planejamento tático começa sem referência estratégica acordada coletivamente.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os participantes saem com clareza sobre quais Apostas e Passivos foram aprovados e qual a hierarquia. Registro de decisões publicado em breve. Apostas e Passivos no sistema antes do início do Planejamento de Roadmap.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Etapa 2 (1-pagers), Ficha da Tese completa, Budget fechado.<br>Alimenta: Strategic Review (revisão semestral) · Planejamento de Roadmap — Pre-work H1.</div>
+`},
+
+'sr-etapa1': {
+  type: 'estrategico',
+  typeLabel: 'Ritual · Estratégico — Etapa 1 de 2',
+  title: 'Strategic Review — Revisão de Teses, Apostas e Passivos',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semestral — meados de abr até meados de mai (~4 semanas)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">Sponsors de Tese · Owners de Apostas e Passivos · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">1-pagers atualizados · Síntese consolidada · Material de pré-leitura para Etapa 2</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Verificar se as Teses, Apostas e Passivos aprovados no Planejamento Estratégico Anual continuam válidos para o H2 — incorporando aprendizados do H1, mudanças de contexto e novas demandas capturadas pelo Intake Process. É o ponto de partida do planejamento do H2.</p>
+<h3>O que é</h3>
+<p>Exercício assíncrono conduzido pelos Sponsors e Owners. Diferente do Planejamento Anual, não é construção do zero — é revisão criteriosa do que já existe, com abertura para ajustes, adições ou descontinuações justificadas.</p>
+<h3>Insumos necessários</h3>
+<ul>
+  <li>1-pagers de Aposta e Passivo vigentes, com status atualizado</li>
+  <li>Fichas de Tese com Apostas e Passivos aprovados</li>
+  <li>Resultados do H1: o que avançou, o que não avançou, o que mudou de contexto</li>
+  <li>Output recente do Intake Process</li>
+  <li>Sinais de mercado ou mudanças regulatórias com impacto nas Apostas vigentes</li>
+</ul>
+<h3>Como acontece</h3>
+<ol>
+  <li>Product Ops envia para cada Sponsor e Owner seus 1-pagers vigentes com três perguntas: "Este item continua válido para o H2?", "Há ajustes necessários?", "Há novos itens que deveriam ser incluídos?" — prazo: 1 semana</li>
+  <li>Owners revisam e atualizam seus 1-pagers, sinalizando claramente o que mudou e por quê</li>
+  <li>Sponsors consolidam a posição da sua Tese: confirmar, ajustar ou descontinuar cada Aposta ou Passivo</li>
+  <li>Product Ops consolida todas as revisões, identifica conflitos entre Teses e prepara síntese com os pontos que precisarão de decisão coletiva na Etapa 2</li>
+</ol>
+<h3>O que produz</h3>
+<ul>
+  <li><strong>1-pagers de Aposta atualizados</strong> — apenas os que sofreram alteração → responsável: Owner</li>
+  <li><strong>1-pagers de Passivo atualizados</strong> — apenas os que sofreram alteração → responsável: Owner</li>
+  <li><strong>Síntese consolidada da Strategic Review</strong> — visão cross-tese com confirmações, ajustes, descontinuações e novos itens propostos, mais pontos de tensão → responsável: Product Ops</li>
+  <li><strong>Material de pré-leitura para a Etapa 2</strong> — enviado com pelo menos 3 dias úteis de antecedência → responsável: Product Ops</li>
+</ul>
+<h3>Tempo estimado</h3>
+<p>Owner: 1–3h por 1-pager revisado. Sponsor: 2–3h de revisão e consolidação. Product Ops: 3–4h de coordenação, consolidação e síntese.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>O H2 começa com Apostas desatualizadas como referência. Mudanças de contexto do H1 não são formalizadas. Times operam com informações defasadas.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os Sponsors entregaram a posição consolidada no prazo. Todos os 1-pagers que precisavam de ajuste foram atualizados. A síntese identifica com clareza o que está alinhado e o que precisa de decisão coletiva. Material de pré-leitura enviado com pelo menos 3 dias úteis de antecedência.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Planejamento Estratégico Anual (Apostas e Passivos aprovados), resultados do H1, Intake Process.<br>Alimenta: Strategic Review — Etapa 2.</div>
+`},
+
+'sr-etapa2': {
+  type: 'estrategico',
+  typeLabel: 'Ritual · Estratégico — Etapa 2 de 2',
+  title: 'Strategic Review — Sessão Síncrona de Alinhamento',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semestral — final de maio (~3-4h)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Síncrono</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">COMEX · Sponsors · Owners · Comitê 2 · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Apostas/Passivos validados H2 · Registro de decisões · 1-pagers atualizados · Sistema atualizado</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Transformar as revisões assíncronas da Etapa 1 em decisões coletivas validadas para o H2. É o momento em que conflitos entre Teses são resolvidos, descontinuações são formalizadas e todo mundo sai alinhado sobre quais Apostas e Passivos orientarão o Planejamento de Roadmap do H2.</p>
+<h3>O que é</h3>
+<p>Sessão síncrona com toda a liderança relevante, conduzida por Product Ops. Mais curta e mais focada que o Offsite do Planejamento Anual — o material já passou por revisão assíncrona e chegou maduro. Acontece mesmo que não haja mudanças — como confirmação formal.</p>
+<h3>Tempo estimado</h3>
+<p>Sessão: 3–4h. Preparação Product Ops: 2–3h. Pós-sessão: 1–2h Product Ops, 1h por Owner.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>As revisões da Etapa 1 ficam como propostas assíncronas nunca formalmente validadas. Conflitos entre Teses não são resolvidos. O H2 começa sem referência estratégica coletivamente acordada.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os participantes saem com clareza sobre quais Apostas e Passivos foram confirmados, ajustados ou descontinuados para o H2. Registro de decisões publicado em breve. Sistema atualizado antes do início do Pre-work do Planejamento de Roadmap do H2.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Strategic Review — Etapa 1 (síntese consolidada e 1-pagers revisados).<br>Alimenta: Planejamento de Roadmap — Pre-work H2.</div>
+`},
+
+'roadmap-prework': {
+  type: 'tatico',
+  typeLabel: 'Ritual · Tático — Etapa 1 de 2',
+  title: 'Planejamento de Roadmap — Pre-work',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semestral — dez (H1) e jun (H2)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">Heads de Tecnologia · PM/TMs · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Iniciativas candidatas documentadas · Proposta preliminar de priorização · Visão agregada</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Transformar as Apostas e Passivos aprovados em propostas concretas de iniciativas para o semestre — com priorização preliminar, impacto esperado, capacidade estimada e dependências declaradas — de forma que o Roadmap Sync seja uma sessão de decisão, não de construção.</p>
+<h3>Quando acontece</h3>
+<ul>
+  <li><strong>H1:</strong> primeira quinzena de dezembro, imediatamente após o Planejamento Estratégico Anual. Deliberadamente mais leve — PM/TMs fazem o levantamento individual e assíncrono. O Roadmap Sync acontece em janeiro.</li>
+  <li><strong>H2:</strong> primeira quinzena de junho, imediatamente após o encerramento da Strategic Review.</li>
+</ul>
+<h3>Insumos necessários</h3>
+<ul>
+  <li>Apostas e Passivos aprovados e atualizados no sistema</li>
+  <li>Output recente do Intake Process</li>
+  <li>Capacidade disponível por squad no semestre — considerando férias, projetos em curso e percentual histórico de sustentação</li>
+</ul>
+<h3>Como acontece</h3>
+<ol>
+  <li>Product Ops dispara o início: compartilha Apostas e Passivos aprovados, template de iniciativa e insumos disponíveis</li>
+  <li>Cada PM/TM, orientado pelo Head de Tecnologia, levanta as iniciativas candidatas — uma por item, seguindo o template</li>
+  <li>Para cada iniciativa o PM/TM preenche: Aposta ou Passivo que serve (campo obrigatório), indicador que vai mexer, áreas envolvidas, duração estimada e capacidade necessária, dependências declaradas, percentual de capacidade reservada para Passivos</li>
+  <li>PM/TM organiza suas iniciativas em uma proposta preliminar de priorização — chega ao Sync com um cenário, não uma lista aberta</li>
+  <li>Product Ops consolida em visão agregada, identifica sobreposições, conflitos de capacidade entre squads, e prepara o material de pré-leitura</li>
+</ol>
+<h3>Tempo estimado</h3>
+<p>PM/TM: 3–6h por squad. Head de Tecnologia: 1–2h de orientação e revisão. Product Ops: 3–5h de consolidação.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>O Roadmap Sync acontece sem material preparado — vira brainstorming. Iniciativas surgem desconectadas das Apostas, sem estimativa de capacidade, com dependências invisíveis. A capacidade reservada para Passivos fica submersa.</p>
+<h3>Critério de sucesso</h3>
+<p>Todas as iniciativas candidatas documentadas antes do Sync, com rastreabilidade, capacidade estimada e dependências declaradas. Nenhum squad entra no Sync com 0% de capacidade reservada para Passivos.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Apostas e Passivos no sistema, Intake Process, capacidade por squad.<br>Alimenta: Planejamento de Roadmap — Roadmap Sync.</div>
+`},
+
+'roadmap-sync': {
+  type: 'tatico',
+  typeLabel: 'Ritual · Tático — Etapa 2 de 2',
+  title: 'Planejamento de Roadmap — Roadmap Sync',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semestral — jan (H1) e jun (H2)</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Síncrono (~3h)</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">PM/TMs · Heads de Tecnologia · Stakeholders (Receita, CS, CX, Ops, Marketing) · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Iniciativas priorizadas por squad · Registro de decisões · Iniciativas no Sistema</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Convergir em decisões coletivas sobre quais iniciativas serão executadas no semestre — com stakeholders presentes para garantir alinhamento entre produto e negócio, e com capacidade real como árbitro das decisões. É o momento em que o planejamento deixa de ser proposta e vira compromisso.</p>
+<h3>Como acontece</h3>
+<ol>
+  <li><strong>Abertura</strong> — Product Ops apresenta o contexto: Apostas e Passivos do semestre, capacidade total disponível e pontos de atenção — 15 min</li>
+  <li><strong>Apresentação por squad</strong> — cada PM/TM apresenta sua proposta: iniciativas candidatas, racional de priorização e cenário de capacidade. Stakeholders questionam — ~20–30 min por squad</li>
+  <li><strong>Negociação e fechamento</strong> — conflitos de capacidade, dependências e iniciativas concorrentes são negociados. Product Ops garante que nenhum squad sai com capacidade acima de 100%</li>
+  <li><strong>Validação final</strong> — Product Ops lê as iniciativas priorizadas para confirmação coletiva. Ressalvas registradas</li>
+  <li><strong>Comunicação pós-evento</strong> — Product Ops publica registro: quais iniciativas priorizadas, o que ficou em backlog e por quê, quais ressalvas. Iniciativas inseridas no sistema</li>
+</ol>
+<h3>Tempo estimado</h3>
+<p>Sessão: ~3h para até 5 squads (+30 min por squad adicional). Preparação Product Ops: 1–2h. Pós-evento: 2–3h Product Ops.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>O planejamento fica como proposta individual — nunca vira compromisso coletivo. Stakeholders não participam e questionam no meio do semestre. Dependências cross-squad só aparecem na execução. Overcommit sistemático.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os squads com lista de iniciativas priorizadas dentro da capacidade real. Nenhum squad com overcommit não explicitado. Dependências cross-squad cobertas. Registro publicado em breve. Iniciativas no sistema antes da execução.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Pre-work (visão agregada).<br>Alimenta: Roadmap Sync Mensal.</div>
+`},
+
+'sync-mensal': {
+  type: 'tatico',
+  typeLabel: 'Ritual · Tático',
+  title: 'Roadmap Sync Mensal',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">~8 edições/ano · 90-120 min</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono (preparação) → Síncrono (reunião) → Assíncrono (comunicação)</div></div>
+  <div class="meta-item"><div class="meta-label">Quem participa</div><div class="meta-value">Head de Produto · PMs · Heads de Tecnologia · Stakeholders (Receita, CS, CX, Ops, Marketing) · Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Status atualizado · Mapa de riscos · Registro do Sync · Backlog atualizado</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Manter o roadmap vivo entre os ciclos semestrais — monitorando o andamento das iniciativas comprometidas por Product Area, identificando e endereçando riscos ativos, e incorporando novas demandas relevantes. É a bomba de ar do sistema: garante que o plano não fica estático e que desvios são endereçados antes de virarem problemas maiores.</p>
+<h3>Três modos de operação</h3>
+<ul>
+  <li><strong>Monitoramento</strong> — status das iniciativas em andamento</li>
+  <li><strong>Revisão de riscos</strong> — bloco obrigatório ao final com mapa consolidado</li>
+  <li><strong>Incorporação</strong> — janela para avaliar novas demandas do Intake</li>
+</ul>
+<h3>Preparação (dias antes)</h3>
+<p>Product Ops solicita a cada PM uma atualização do status no sistema. Consolida inputs do Intake Process, mapeia riscos do período e prepara visão agregada por Product Area.</p>
+<h3>Reunião mensal</h3>
+<ol>
+  <li>Abertura — Head de Produto contextualiza o momento do semestre (~5 min)</li>
+  <li>Apresentação por Product Area — PM apresenta status, riscos e pedidos de desbloqueio (~10 min/área)</li>
+  <li>Janela de debate por área — Stakeholders desafiam prioridades, sinalizam riscos, trazem contexto de negócio (~10 min/área)</li>
+  <li>Revisão de riscos (bloco obrigatório) — Product Ops apresenta mapa consolidado. Cada risco sai com responsável e prazo (~15 min)</li>
+  <li>Incorporação de novas demandas — inputs do Intake avaliados para incorporação ou backlog (~15 min)</li>
+  <li>Fechamento — decisões confirmadas em voz alta</li>
+</ol>
+<h3>Comunicação pós-reunião</h3>
+<p>Product Ops publica registro: status consolidado por Product Area, pontos de debate, riscos com responsável e prazo, novas demandas incorporadas ou encaminhadas. Responde "o que quem não estava presente precisa saber".</p>
+<h3>Tempo estimado</h3>
+<p>Reunião: ~90–120 min. Preparação Product Ops: 1,5–2h. Pós-reunião: ~1h.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>Roadmap congela entre os ciclos semestrais. Riscos acumulam sem endereçamento. Desvios só aparecem no próximo planejamento. Stakeholders perdem visibilidade e voltam ao ad hoc. Sinais de negócio não chegam ao time de produto de forma estruturada.</p>
+<h3>Critério de sucesso</h3>
+<p>Status atualizado no sistema antes da reunião. Cada PM apresenta ativamente. Janela de debate acontece sem ultrapassar o tempo. Todos os riscos saem com responsável. Registro publicado em breve. Nenhuma demanda relevante do Intake fica sem avaliação.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Iniciativas no sistema, Intake Process.<br>Alimenta: próximo Sync Mensal · Planejamento de Roadmap · liderança de produto (riscos escalados).</div>
+`},
+
+'dev-review': {
+  type: 'operacional',
+  typeLabel: 'Ritual · Operacional',
+  title: 'Dev Review',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Trimestral — Fev, Mai, Ago, Nov</div></div>
+  <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono (preparação) → Síncrono (sessão) → Assíncrono (comunicação)</div></div>
+  <div class="meta-item"><div class="meta-label">Donos</div><div class="meta-value">Heads de Engenharia</div></div>
+  <div class="meta-item"><div class="meta-label">Público</div><div class="meta-value">Heads de Engenharia + Heads de Produto + Product Ops + Nanda</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Garantir que a liderança de produto tenha visibilidade sobre a saúde da operação de desenvolvimento — não para microgerenciar, mas para sair da subjetividade e ter evidências que fundamentem decisões sobre produtividade, qualidade e capacidade. Sem esse ritual, percepções de baixa entrega circulam sem dado que as confirme ou refute.</p>
+<h3>O que é</h3>
+<p>Ritual trimestral conduzido pelos Heads de Engenharia, focado exclusivamente no downstream — ou seja, na execução: o que está sendo entregue, em que velocidade, com qual qualidade e quanto do trabalho estava planejado. Product Ops atua como arquiteto do ritual e consumidor dos outputs.</p>
+<h3>Pré-condição de maturidade</h3>
+<p>Pressupõe que o Jira está sendo usado de forma disciplinada e confiável. Antes de rodar em formato pleno, Product Ops deve verificar se o sistema está sendo alimentado de forma consistente. Se não, começa com escopo reduzido.</p>
+<h3>Métricas</h3>
+<ul>
+  <li>Throughput — épicos/histórias entregues no período</li>
+  <li>Lead time — tempo médio entre abertura e fechamento de épicos</li>
+  <li>Proporção de trabalho planejado vs. não planejado</li>
+  <li>Indicadores de saúde do software (deployment frequency, MTTR — quando disponíveis)</li>
+  <li>Link entre épicos no Jira e iniciativas no sistema</li>
+</ul>
+<h3>Preparação (semana anterior)</h3>
+<p>Heads de Engenharia consolidam os dados do período. Product Ops verifica confiabilidade e alinha quais perguntas o ritual deve responder nessa edição.</p>
+<h3>Sessão trimestral</h3>
+<ol>
+  <li>Abertura — Product Ops apresenta perguntas centrais e contexto (~5 min)</li>
+  <li>Apresentação por Product Area — Heads de Engenharia apresentam throughput, lead time, planejado vs. não planejado. Comparação sempre com histórico do próprio time, nunca entre squads (~30–40 min)</li>
+  <li>Análise e provocações — Heads de Produto questionam: variações, platôs, épicos sem link com iniciativas (~15 min)</li>
+  <li>Encaminhamentos — sinais que exigem ação, pontos para levar à Nanda</li>
+</ol>
+<h3>Comunicação pós-sessão</h3>
+<p>Product Ops consolida achados e encaminhamentos. Registro compartilhado com Nanda e participantes.</p>
+<h3>Tempo estimado</h3>
+<p>Sessão: ~60–90 min. Preparação Heads Eng: 2–3h. Consolidação Product Ops: 1–2h.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>Liderança opera sem dados. Percepções subjetivas circulam sem evidência. Pedidos de contratação e realocação são tomados sem fundamento. Desvios entre planejado e entregue só aparecem quando o dano já está feito.</p>
+<h3>Critério de sucesso</h3>
+<p>Dados confiáveis. Comparação sempre com histórico próprio. Todos os encaminhamentos com responsável. Registro chega à Nanda antes da próxima sessão de planejamento ou revisão.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: uso disciplinado do Jira, link épicos → iniciativas.<br>Alimenta: Roadmap Sync Mensal (riscos operacionais) · Planejamento de Roadmap (evidências de capacidade) · liderança de produto.</div>
+`},
+
+'intake': {
+  type: 'processo',
+  typeLabel: 'Processo Contínuo',
+  title: 'Intake Process',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Contínuo — sem data fixa</div></div>
+  <div class="meta-item"><div class="meta-label">Triagem</div><div class="meta-value">Product Ops · até 2 dias úteis</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Capturar, triar e encaminhar demandas de todas as fontes para os rituais de priorização — garantindo que nada se perde e que toda demanda recebe devolutiva estruturada.</p>
+<h3>Fontes</h3>
+<ul>
+  <li>VoC — voz do cliente</li>
+  <li>Receita / Comercial</li>
+  <li>Regulatório / Risco (trilha acelerada para demandas críticas)</li>
+  <li>Insights de dados</li>
+  <li>Benchmark & Mercado</li>
+  <li>Iniciativas internas</li>
+</ul>
+<h3>Fluxo</h3>
+<ol>
+  <li><strong>Captura</strong> — formulário Jira ou canal dedicado</li>
+  <li><strong>Triagem</strong> — Product Ops avalia em até 2 dias úteis: contexto, urgência, fonte</li>
+  <li><strong>Enriquecimento</strong> — contexto e sizing básico adicionados</li>
+  <li><strong>Priorização</strong> — nos rituais táticos (Roadmap Sync Mensal)</li>
+  <li><strong>Incorporação ao roadmap</strong> — se aprovado na priorização</li>
+</ol>
+<h3>Trilha acelerada</h3>
+<p>Demandas regulatórias ou de risco crítico seguem trilha acelerada — não esperam o próximo Sync Mensal.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimenta: Roadmap Sync Mensal (inputs para incorporação) · Planejamento de Roadmap (insumo acumulado).<br>Alimentado por: CX, CS, Comercial, Regulatório, Dados.</div>
+`},
+
+'sync-lancamentos': {
+  type: 'tatico',
+  typeLabel: 'Ritual · Lançamentos',
+  title: 'Sync de Lançamentos',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Semanal — ano inteiro (~35-40 min)</div></div>
+  <div class="meta-item"><div class="meta-label">Conduz</div><div class="meta-value">PMM (Taciana)</div></div>
+  <div class="meta-item"><div class="meta-label">Público</div><div class="meta-value">Product Ops + PMM + Champions (CX, CS, Comercial)</div></div>
+  <div class="meta-item"><div class="meta-label">Produz</div><div class="meta-value">Kanban atualizado · Registro semanal · Disparos no canal Lançamentos Caju</div></div>
+</div>
+<h3>Propósito</h3>
+<p>Garantir que CX, CS e Comercial estejam preparados antes de cada rollout — com antecedência suficiente para produzir materiais, treinar times e mapear riscos. É o fórum que evita que lançamentos gerem ruído, contact rate desnecessário e surpresas para as áreas de frente.</p>
+<h3>O que é</h3>
+<p>Ritual síncrono semanal de acompanhamento do pipeline de lançamentos, conduzido pelo PMM com champions das áreas. Funciona como passagem pelo Kanban: o que está a caminho, o que está pronto para sair, o que está travado. Não é reunião de produto — é de orquestração de prontidão.</p>
+<h3>Preparação (antes da reunião)</h3>
+<p>PMM consolida o estado do Kanban. Champions verificam se há dúvidas ou riscos. PMs garantem que o ROD dos itens em pauta está preenchido.</p>
+<h3>Reunião semanal</h3>
+<ol>
+  <li>Passagem pelo Kanban — item a item: pronto para sair, em preparação, travado (~15 min)</li>
+  <li>Janela de dúvidas e riscos — champions levantam dúvidas, riscos de contact rate, conflitos de timing (~10 min)</li>
+  <li>Avaliação de prontidão — PMM verifica se áreas estão prontas: artigo na central de ajuda? Time treinado? Comunicação preparada? Se não, sinalizado como não pronto (~10 min)</li>
+  <li>Próximos passos — encaminhamentos confirmados em voz alta</li>
+</ol>
+<h3>Comunicação pós-reunião</h3>
+<p>Product Ops publica registro no canal <strong>Lançamentos Caju</strong> (fechado para comentários). Responde: o que vai ser lançado e quando, o que está travado e por quê, o que cada área precisa fazer.</p>
+<h3>Tempo estimado</h3>
+<p>Reunião: ~35–40 min. Preparação PMM: ~30 min. Pós-reunião Product Ops: ~30 min.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>Lançamentos saem sem que CX, CS e Comercial estejam preparados. Contact rate aumenta. Times de frente são pegos de surpresa. Conflitos de timing só aparecem depois do problema.</p>
+<h3>Critério de sucesso</h3>
+<p>Todos os lançamentos da semana têm ROD preenchido antes da reunião. Nenhum rollout sem prontidão sinalizada. Registro publicado logo após. Champions replicam informações sem reuniões adicionais.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: ROD (PMs) · Roadmap Sync Mensal (visibilidade de pipeline).<br>Alimenta: Canal Lançamentos Caju · Intake Process (riscos e sinais de campo).</div>
+`},
+
+'ciclo-dev': {
+  type: 'operacional',
+  typeLabel: 'Processo Contínuo',
+  title: 'Ciclo de Desenvolvimento de Produto',
+  body: `
+<h3>O que é</h3>
+<p>Ciclo de desenvolvimento que acontece continuamente ao longo do ano — squads trabalhando nos Épicos priorizados no Planejamento de Roadmap, com visibilidade garantida pelo Dev Review trimestral.</p>
+<h3>Rastreabilidade</h3>
+<p>Épico no Jira → Iniciativa no Notion → Aposta ou Passivo. Essa cadeia garante que o Dev Review consegue responder: "este Épico está contribuindo para qual Aposta?"</p>
+<h3>Relação com o Dev Review</h3>
+<p>O Dev Review não interfere no ciclo — observa e mede. As métricas de throughput, lead time e trabalho planejado vs. não planejado são coletadas do Jira e apresentadas trimestralmente.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Ferramentas: Jira (Épicos) + Notion (Roadmap Centralizado).<br>Alimenta: Dev Review.</div>
+`},
+
+'budget': {
+  type: 'externo',
+  typeLabel: 'Processo · Externo à Governança',
+  title: 'Budget',
+  body: `
+<h3>O que é</h3>
+<p>Processo financeiro que roda em paralelo ao Planejamento Estratégico Anual. Não é um ritual de Product Ops — é uma restrição de entrada. O Budget define o envelope de capacidade disponível dentro do qual as Apostas e Passivos do ciclo precisam caber.</p>
+<h3>Relação com a Governança</h3>
+<p>O Budget fecha junto com a Etapa 2 do Planejamento Anual. A definição de Apostas e Passivos deve ser feita com consciência das restrições orçamentárias do próximo ciclo.</p>
+`},
+
+// ─── ARTEFATOS ─────────────────────────────────
+
+'art-6pager': {
+  type: 'estrategico',
+  typeLabel: 'Artefato · Estratégico',
+  title: '6-pager de Tese',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">Sponsor da Tese</div></div>
+  <div class="meta-item"><div class="meta-label">Criado em</div><div class="meta-value">Planejamento Anual — Etapa 1</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento narrativo longo que articula o raciocínio estratégico completo de uma Tese. É o documento fundacional — produzido pelo Sponsor — que sustenta todo o desdobramento subsequente.</p>
+<div class="connect-box"><strong>Conecta com:</strong> Alimenta a Ficha da Tese e os 1-pagers de Aposta (contexto).</div>
+`},
+
+'art-ficha-tese': {
+  type: 'estrategico',
+  typeLabel: 'Artefato · Estratégico',
+  title: 'Ficha da Tese',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">Product Ops</div></div>
+  <div class="meta-item"><div class="meta-label">Formato</div><div class="meta-value">Google Sheets</div></div>
+  <div class="meta-item"><div class="meta-label">Criada em</div><div class="meta-value">Fim do Planejamento Anual</div></div>
+  <div class="meta-item"><div class="meta-label">Revisada em</div><div class="meta-value">Fim de cada Strategic Review</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento estruturado de uma página que sintetiza o desdobramento completo de uma Tese — do North Star até as Apostas — servindo como referência rápida e fonte de rastreabilidade. Conecta a camada estratégica com a tática: qualquer pessoa que precise entender o que está sendo perseguido em uma Tese encontra tudo aqui.</p>
+<h3>Campos obrigatórios</h3>
+<ul>
+  <li>Nome da Tese e Sponsor · Link para o 6-pager</li>
+  <li>North Star — métrica principal e meta quantitativa (ex: NPS Empresa ≥ 80)</li>
+  <li>Declaração de direção — frase que descreve o que a Tese persegue em linguagem de posicionamento</li>
+  <li>Alavancas — lista com nome, subdescritivo e meta X→Y</li>
+  <li>Apostas por Alavanca — código, descrição, Owner, Potencial Impacto</li>
+  <li>Notas de contexto — decisões de design da Ficha</li>
+</ul>
+<h3>Impacto se deixar de existir</h3>
+<p>O desdobramento fica preso no 6-pager — inacessível no dia a dia. A rastreabilidade depende de memória, não de documento.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentada por: 6-pager (Sponsor) · 1-pagers de Aposta (Owners) · Planejamento Anual Etapa 2.<br>Alimenta: Strategic Review · Planejamento de Roadmap · Apostas/Passivos no Sistema.</div>
+`},
+
+'art-1pager-aposta': {
+  type: 'estrategico',
+  typeLabel: 'Artefato · Estratégico',
+  title: '1-pager de Aposta',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">Owner da Aposta + validação do Sponsor</div></div>
+  <div class="meta-item"><div class="meta-label">Criado em</div><div class="meta-value">Planejamento Anual — Etapa 2</div></div>
+  <div class="meta-item"><div class="meta-label">Atualizado em</div><div class="meta-value">Strategic Review</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento que descreve e justifica uma Aposta estratégica — a direção de ação escolhida para mover uma Alavanca. Transforma uma escolha em compromisso documentado, com raciocínio explícito e métrica. Uma Aposta sem 1-pager é uma opinião — com 1-pager é uma hipótese documentada.</p>
+<h3>Campos obrigatórios</h3>
+<ul>
+  <li><strong>Aposta</strong> — frase com verbo, descrevendo uma escolha de caminho</li>
+  <li><strong>Tese e Alavanca</strong> — rastreabilidade</li>
+  <li><strong>Owner</strong></li>
+  <li><strong>Diagnóstico</strong> — "por que não movemos essa Alavanca?" e "qual oportunidade?"</li>
+  <li><strong>Justificativa</strong> — raciocínio defensável com dado, benchmark ou referência</li>
+  <li><strong>Impacto esperado na Alavanca</strong></li>
+  <li><strong>Indicador operacional</strong> — leading indicator, diferente do North Star</li>
+  <li><strong>Status</strong> — Ativa / Em revisão / Encerrada (validada / invalidada / descontinuada)</li>
+</ul>
+<h3>Critério de qualidade</h3>
+<p>Começa com verbo. Diagnóstico responde as duas perguntas sem misturá-las. Justificativa tem dado ou referência. Indicador é diferente do North Star.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>Apostas viram itens de lista sem raciocínio rastreável. No Strategic Review, a discussão começa do zero. Decisões de descontinuar ficam sem base documentada.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimenta: Ficha da Tese · Apostas no Sistema · Strategic Review · Product Pitch.</div>
+`},
+
+'art-1pager-passivo': {
+  type: 'estrategico',
+  typeLabel: 'Artefato · Estratégico (Passivos)',
+  title: '1-pager de Passivo',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">Owner do Passivo (PM ou Tech Lead)</div></div>
+  <div class="meta-item"><div class="meta-label">Criado em</div><div class="meta-value">Planejamento Anual — Etapa 2</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento que descreve um Passivo individual — compromisso obrigatório, sua origem, custo de não fazer e capacidade consumida. Torna cada obrigação rastreável e defensável.</p>
+<h3>Campos obrigatórios</h3>
+<ul>
+  <li><strong>Passivo</strong> — descrição em uma frase</li>
+  <li><strong>Categoria</strong> — Regulatório / Débito Técnico / Sustentação / Operação</li>
+  <li><strong>Owner</strong> · <strong>Origem</strong> (específica, não genérica)</li>
+  <li><strong>Custo de não fazer</strong> — concreto e verificável</li>
+  <li><strong>Indicador associado</strong> (quando aplicável)</li>
+  <li><strong>Capacidade estimada</strong> — validada com time técnico</li>
+  <li><strong>Prazo/restrição temporal</strong> — se houver data limite externa</li>
+  <li><strong>Status</strong> — Em fila / Em execução / Concluído</li>
+</ul>
+<h3>Glossário de categorias</h3>
+<ul>
+  <li><strong>Regulatório</strong> — obrigações legais/compliance. Origem externa. Critério = conformidade.</li>
+  <li><strong>Débito Técnico</strong> — trabalho técnico acumulado. Origem interna. Pode ter indicador.</li>
+  <li><strong>Sustentação</strong> — manutenção da operação: bugs, incidentes, estabilidade. Critério = ausência de degradação.</li>
+  <li><strong>Operação</strong> — compromissos contratuais, integrações com parceiros. Origem relacional.</li>
+</ul>
+<h3>Impacto se deixar de existir</h3>
+<p>O Passivo vira linha sem contexto na Ficha. O custo de não fazer fica implícito — e o que é implícito não entra no trade-off.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimenta: Ficha de Passivos · Passivos no Sistema · Planejamento de Roadmap · Strategic Review.</div>
+`},
+
+'art-sistema-apostas': {
+  type: 'estrategico',
+  typeLabel: 'Artefato · Sistema',
+  title: 'Apostas e Passivos no Sistema',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Ferramenta</div><div class="meta-value">Jira (preferencial) ou Notion</div></div>
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">Product Ops</div></div>
+</div>
+<h3>O que é</h3>
+<p>Registro de Apostas e Passivos no sistema — a camada de rastreabilidade que permite linkar cada Iniciativa e Épico à sua Aposta ou Passivo de origem. Sem os itens no sistema, a governança é apenas documentação.</p>
+<h3>Por que Jira é preferencial</h3>
+<p>Garante linkagem direta Aposta → Iniciativa → Épico. Notion é alternativa válida mas exige maior disciplina.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: 1-pagers e Offsite.<br>Alimenta: todos os rituais táticos e operacionais que dependem de rastreabilidade.</div>
+`},
+
+'art-product-pitch': {
+  type: 'tatico',
+  typeLabel: 'Artefato · Tático',
+  title: 'Product Pitch (PP)',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM (com tríade — Engineer e Designer)</div></div>
+  <div class="meta-item"><div class="meta-label">Criado em</div><div class="meta-value">Pre-work do Planejamento de Roadmap</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento que descreve e defende uma Iniciativa candidata à priorização. Articula o problema, a solução, o impacto e a capacidade — com rastreabilidade para Aposta e Alavanca. Força o PM a articular o raciocínio <em>antes</em> da reunião de priorização. Sem PP, a priorização vira disputa de narrativa oral; com PP, vira decisão baseada em evidência.</p>
+<h3>Quando escrever</h3>
+<p>Quando o projeto consome ≥2 semanas de engenheiro, impacta outras áreas, ou trará maior qualidade com documentação. <strong>Não</strong> escrever se a solução for óbvia para todos.</p>
+<h3>Cabeçalho obrigatório</h3>
+<ul>
+  <li>Título da Iniciativa · PM responsável</li>
+  <li>Aposta relacionada — código e descrição</li>
+  <li>Alavanca relacionada</li>
+  <li>Capacidade estimada — validada com time técnico</li>
+  <li>Impacto declarado — na unidade da Alavanca, para comparar Iniciativas concorrentes</li>
+</ul>
+<h3>Estrutura</h3>
+<ul>
+  <li><strong>Parte 1 — Problema:</strong> Qual o problema? Por que agora? Hipótese de solução</li>
+  <li><strong>Parte 2 — Proposta:</strong> O que vamos fazer? Como construir? Público-alvo? Métricas de sucesso?</li>
+  <li><strong>FAQ Interno</strong> — antecipa objeções dos stakeholders</li>
+  <li><strong>FAQ Externo</strong> — antecipa dúvidas dos usuários</li>
+  <li><strong>Aprovações</strong> — lista de stakeholders que precisam dar OK</li>
+</ul>
+<h3>Impacto se deixar de existir</h3>
+<p>Priorização por narrativa oral. Iniciativas não são comparáveis. Rastro entre Aposta e Iniciativa se perde.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: 1-pager de Aposta, Intake, Pre-work.<br>Alimenta: Iniciativa no Sistema · Roadmap Sync.</div>
+`},
+
+'art-iniciativas-sistema': {
+  type: 'tatico',
+  typeLabel: 'Artefato · Sistema',
+  title: 'Iniciativas no Sistema',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Ferramenta</div><div class="meta-value">Notion — Roadmap Centralizado</div></div>
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM + Product Ops</div></div>
+</div>
+<h3>O que é</h3>
+<p>Registro das Iniciativas priorizadas no Notion, linkadas à Aposta ou Passivo de origem. É o que o Roadmap Sync Mensal monitora e a base para os Dev Reviews.</p>
+<h3>Links obrigatórios</h3>
+<ul>
+  <li>→ Aposta ou Passivo de origem (rastreabilidade estratégica)</li>
+  <li>→ Épicos derivados no Jira (rastreabilidade operacional)</li>
+  <li>→ ROD quando lançamento está próximo (rastreabilidade de lançamento)</li>
+</ul>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentada por: Planejamento de Roadmap, Product Pitch aprovado.<br>Alimenta: Roadmap Sync Mensal · Dev Review · ROD.</div>
+`},
+
+'art-rod': {
+  type: 'tatico',
+  typeLabel: 'Artefato · Lançamentos',
+  title: 'ROD — Release Operational Document',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM (produto) + PMM (comunicação) — co-autoria obrigatória</div></div>
+  <div class="meta-item"><div class="meta-label">Antecedência mínima</div><div class="meta-value">15 dias antes do rollout</div></div>
+  <div class="meta-item"><div class="meta-label">Criado quando</div><div class="meta-value">Épico entra em dev e data de rollout estimada</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento que centraliza todas as informações necessárias para que CX, CS e Comercial estejam preparados para um lançamento — com a antecedência correta, formato certo e nível de detalhe que cada área precisa. É a fonte única da verdade para o Sync de Lançamentos.</p>
+<h3>Quem consome</h3>
+<ul>
+  <li>Champions de CX — central de ajuda, treinamento, chatbot</li>
+  <li>Champions de CS Valor — match lançamento × oportunidade de cliente</li>
+  <li>Champions de Comercial — pitch de vendas, calendário comercial</li>
+  <li>PMM — plano de comunicação, prontidão por área</li>
+  <li>Product Ops — base do Kanban GTM, avaliação de prontidão</li>
+</ul>
+<h3>Estrutura</h3>
+<ul>
+  <li><strong>Cabeçalho:</strong> Nome, PM/PMM, Épico no Jira, Iniciativa no Notion, Nível (0-3), Data rollout</li>
+  <li><strong>Seção 1:</strong> Contexto do produto — o que, por que, dores/oportunidades, riscos</li>
+  <li><strong>Seção 2:</strong> Casos de uso por área (CX · CS · Comercial)</li>
+  <li><strong>Seção 3:</strong> Métricas e plano de rollout em fases</li>
+  <li><strong>Seção 4:</strong> Comunicação e enablement (PMM)</li>
+  <li><strong>Seção 5:</strong> Checklist de prontidão por área (obrigatoriedade varia por nível 0-3)</li>
+  <li><strong>Seção 6:</strong> Pós-lançamento — aprendizados e plano de ação</li>
+</ul>
+<h3>Impacto se deixar de existir</h3>
+<p>Cada área busca informação em canais diferentes. CX é pego de surpresa. CS não faz match com oportunidades. Contact rate aumenta. Sync de Lançamentos acontece sem base comum.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Épico no Jira · Iniciativa no Notion · imersões com CX, CS e Comercial.<br>Alimenta: Sync de Lançamentos · Canal Lançamentos Caju · champions das áreas.</div>
+`},
+
+'art-prd': {
+  type: 'operacional',
+  typeLabel: 'Artefato · Operacional',
+  title: 'PRD — Product Requirements Document',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM (com tríade — Engineer e Designer)</div></div>
+  <div class="meta-item"><div class="meta-label">Relação</div><div class="meta-value">Parte 3 do Product Pitch</div></div>
+  <div class="meta-item"><div class="meta-label">Criado quando</div><div class="meta-value">Após aprovação da Iniciativa, antes do dev</div></div>
+</div>
+<h3>O que é</h3>
+<p>Documento técnico que detalha o que precisa ser construído em um Épico — escopo, requisitos funcionais, critérios de aceitação, riscos e dependências. Contrato entre PM e engenharia. Não prescreve a solução técnica — prescreve o problema com precisão suficiente para que a tríade encontre a melhor solução.</p>
+<h3>Estrutura</h3>
+<ul>
+  <li><strong>Cabeçalho:</strong> Épico, PM, links (Iniciativa, Aposta, Jira), estimativa, datas, contexto resumido</li>
+  <li><strong>Seção 1 — Escopo:</strong> incluído ✅ / excluído ❌ com justificativa</li>
+  <li><strong>Seção 2 — Requisitos funcionais:</strong> requisitos, critérios de aceitação, user stories, caminho feliz, cenários de erro</li>
+  <li><strong>Seção 3 — Riscos e dependências:</strong> riscos técnicos, de usabilidade, de adoção + dependências com owner e prazo</li>
+  <li><strong>Seção 4 — Anexos:</strong> wireframes, protótipos, diagramas</li>
+</ul>
+<h3>Critério de qualidade</h3>
+<p>Escopo sem ambiguidade. Critérios de aceitação verificáveis. Cenários de erro cobrem conectividade, validação e estados vazios. Dependências com owner e prazo. Estimativa validada com time técnico.</p>
+<h3>Impacto se deixar de existir</h3>
+<p>Requisitos viram conversas individuais. Cenários de erro só aparecem em produção. Escopo escorrega sem registro. QA sem base para testes.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Product Pitch · Iniciativa · refinamento com tríade.<br>Alimenta: Épico no Jira · Dev Review.</div>
+`},
+
+'art-epicos-sistema': {
+  type: 'operacional',
+  typeLabel: 'Artefato · Sistema',
+  title: 'Épicos no Sistema',
+  body: `
+<div class="meta-grid">
+  <div class="meta-item"><div class="meta-label">Ferramentas</div><div class="meta-value">Jira (delivery) + Notion (Roadmap)</div></div>
+  <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM + Engenharia</div></div>
+</div>
+<h3>O que é</h3>
+<p>Registro dos Épicos no Jira, linkados às Iniciativas no Notion. Conecta planejamento e execução técnica — e é o que o Dev Review monitora trimestralmente.</p>
+<h3>Links obrigatórios</h3>
+<ul>
+  <li>→ Iniciativa no Notion (rastreabilidade estratégica)</li>
+  <li>→ PRD (especificação da entrega)</li>
+  <li>→ ROD quando é um lançamento (rastreabilidade de lançamento)</li>
+</ul>
+<h3>O que o Dev Review monitora</h3>
+<ul>
+  <li>Throughput — quantidade de épicos entregues no período</li>
+  <li>Lead time — tempo médio entre abertura e fechamento</li>
+  <li>Proporção de trabalho planejado vs. não planejado</li>
+  <li>Épicos sem link com Iniciativas (sinal de trabalho fora do portfólio acordado)</li>
+</ul>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: PRD · Iniciativas no sistema · Planejamento de Roadmap.<br>Alimenta: Dev Review (métricas de saúde) · ROD (rastreabilidade de lançamento).</div>
+`},
+
+// ─── NÍVEIS DE DESDOBRAMENTO ──────────────────
+
+'nivel-tese': {
+  type: 'estrategico',
+  typeLabel: 'Nível · Estratégico',
+  title: 'Tese',
+  body: `
+<h3>O que é</h3>
+<p>A aposta estratégica de mais alto nível — uma convicção sobre onde e como a Caju vai criar valor no ciclo. A Caju opera com 4 Teses: Tese 1 (Experiência como Diferencial Competitivo), Tese 2 (Crescimento — ARR ≥ R$480M), Tese 3 (Despesas como Segundo Pilar de Receita) e Tese 4 (HCM).</p>
+<h3>Documentos</h3>
+<p>O <strong>6-pager</strong> é o documento narrativo longo (Sponsor). A <strong>Ficha da Tese</strong> é a versão estruturada e sintética (Product Ops).</p>
+<p><strong>Relação:</strong> 1 North Star por Tese · 1:n Alavancas · 1:n Apostas</p>
+`},
+
+'nivel-northstar': {
+  type: 'estrategico',
+  typeLabel: 'Nível · Estratégico',
+  title: 'North Star',
+  body: `
+<h3>O que é</h3>
+<p>Indicador estratégico que representa o destino de longo prazo da Tese. É um <strong>lagging indicator</strong> — não é algo que o time influencia diretamente em uma sprint, é onde queremos chegar.</p>
+<p><strong>Exemplo:</strong> Tese 1 (Experiência): NPS Empresa ≥ 80 e NPS Colaborador ≥ 80.</p>
+<h3>Diferença da Alavanca</h3>
+<p>O North Star é o <strong>destino</strong>. As Alavancas são os <strong>caminhos</strong> — dimensões mensuráveis que, se movidas, contribuem para o North Star. O time trabalha nas Alavancas, não diretamente no North Star.</p>
+<p><strong>Relação:</strong> 1:1 com cada Tese</p>
+`},
+
+'nivel-alavancas': {
+  type: 'estrategico',
+  typeLabel: 'Nível · Estratégico',
+  title: 'Alavancas',
+  body: `
+<h3>O que é</h3>
+<p>Dimensões mensuráveis que, se movidas, contribuem para o North Star. São <strong>leading indicators</strong> — coisas que o time pode influenciar diretamente e que sinalizam movimento na direção certa.</p>
+<p><strong>Exemplo (Tese 1):</strong> CSAT Empresa (qualidade percebida), Contact Rate Empresa (experiência objetiva), CSAT Colaborador, Contact Rate Colaborador, FCR — Operador Caju (capacidade operacional). Cada Alavanca tem meta X→Y e um conjunto de Apostas.</p>
+<p><strong>Relação:</strong> 1:n por Tese · Cada Alavanca tem 1:n Apostas</p>
+`},
+
+'nivel-apostas': {
+  type: 'tatico',
+  typeLabel: 'Nível · Tático',
+  title: 'Apostas',
+  body: `
+<h3>O que é</h3>
+<p>Direção de ação escolhida para mover uma Alavanca. Uma Aposta é por natureza uma hipótese — alocar recursos em algo incerto.</p>
+<h3>Por que Hipóteses foram removidas do modelo</h3>
+<p>Hipóteses eram sistematicamente 1:1 com Apostas — redundantes. A relação causal agora vive dentro do 1-pager de Aposta, nos campos de diagnóstico e justificativa. Decisão validada com Nanda em 01/04/2026.</p>
+<h3>Diferença de Iniciativa</h3>
+<p>A Aposta é a <strong>direção estratégica</strong> — "o que queremos tentar para mover esta Alavanca". A Iniciativa é o que o time vai <strong>construir</strong> para tentar validar aquela direção. Uma Aposta pode ter várias Iniciativas ao longo do tempo.</p>
+<p><strong>Relação:</strong> 1:n por Alavanca · Documento: 1-pager de Aposta</p>
+`},
+
+'nivel-passivos': {
+  type: 'tatico',
+  typeLabel: 'Nível · Paralelo às Apostas',
+  title: 'Passivos',
+  body: `
+<h3>O que é</h3>
+<p>Compromissos obrigatórios que consomem capacidade do time sem ser apostas estratégicas: Regulatório, Débito Técnico, Sustentação, Operação. São planejados em paralelo às Apostas na Etapa 2 do Planejamento Anual.</p>
+<h3>Por que separados das Apostas</h3>
+<p><strong>Aposta = escolha estratégica. Passivo = obrigação.</strong> Misturar os dois distorce a visibilidade do portfólio e esconde o custo real da não-escolha.</p>
+<h3>Artefatos</h3>
+<p>Ficha de Passivos (visão consolidada do ciclo por categoria) + 1-pager de Passivo (documento individual por compromisso).</p>
+`},
+
+'nivel-iniciativas': {
+  type: 'tatico',
+  typeLabel: 'Nível · Tático',
+  title: 'Iniciativas',
+  body: `
+<h3>O que é</h3>
+<p>Conjunto de trabalho priorizável que deriva de uma Aposta — o que o time vai construir para tentar validá-la. É o nível onde a estratégia vira compromisso de execução no Planejamento de Roadmap.</p>
+<h3>Diferença de Épico</h3>
+<p>A Iniciativa é o <strong>"o quê" estratégico</strong> — visível no Roadmap Sync Mensal e linkada à Aposta no Notion. O Épico é o <strong>"como técnico"</strong> — visível no Jira e gerenciado pelo time de engenharia. Uma Iniciativa pode ter vários Épicos.</p>
+<p><strong>Relação:</strong> 1:n por Aposta · Documento: Product Pitch</p>
+`},
+
+'nivel-epicos': {
+  type: 'operacional',
+  typeLabel: 'Nível · Operacional',
+  title: 'Épicos',
+  body: `
+<h3>O que é</h3>
+<p>Unidade de trabalho técnico no Jira. Cada Épico deve estar linkado à sua Iniciativa no Notion, garantindo rastreabilidade de volta à Aposta e à Tese.</p>
+<h3>Hierarquia</h3>
+<p>Épico → User Story → Tarefa. A User Story detalha o comportamento esperado pelo usuário. A Tarefa é a unidade de trabalho do desenvolvedor.</p>
+<p><strong>Relação:</strong> 1:n por Iniciativa · Ferramenta: Jira · Documento: PRD</p>
+`}
+
+};
+
+
+function openModal(id) {
+  const d = data[id];
+  if (!d) return;
+  document.getElementById('modalType').className = 'modal-type ' + d.type;
+  document.getElementById('modalType').textContent = d.typeLabel;
+  document.getElementById('modalTitle').textContent = d.title;
+  document.getElementById('modalBody').innerHTML = d.body;
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ── Intro modal ────────────────────────────────────
+
+const introData = {
+
+'intro-1': {
+  type: 'estrategico',
+  typeLabel: 'Visão Geral',
+  title: 'Por que essa governança existe',
+  body: `
+<p>À medida que um time de produto cresce e o portfólio se expande, a forma como as decisões são tomadas, comunicadas e acompanhadas precisa evoluir junto. A governança que você está vendo aqui é o sistema operacional que organiza como o time de produto da Caju opera — desde a definição das apostas estratégicas até a entrega no mercado.</p>
+
+<p>O modelo foi construído em três camadas complementares. A camada <strong>Estratégica</strong> é onde o time define e revisa as apostas do ciclo — o que acreditamos, para onde vamos e por quê. A camada <strong>Tática</strong> transforma essas apostas em roadmap comprometido, com capacidade real e stakeholders alinhados. A camada <strong>Operacional</strong> garante que o que foi planejado está sendo executado com qualidade e previsibilidade.</p>
+
+<p>Conectando as três camadas, há um modelo de desdobramento — Tese → North Star → Alavancas → Apostas → Iniciativas — que garante rastreabilidade de ponta a ponta. Qualquer iniciativa no roadmap tem uma Aposta que a origina, uma Alavanca que ela pretende mover, e uma Tese que dá o contexto estratégico. Esse encadeamento é o que permite perguntar "por que estamos fazendo isso?" em qualquer nível e ter uma resposta documentada.</p>
+
+<p>Um dos efeitos mais importantes de ter esse modelo funcionando é o que ele faz com a priorização. Quando as apostas estão claras, os trade-offs ficam visíveis — e a empresa consegue entrar em acordo sobre o que vira foco, o que fica para depois e por quê. A priorização deixa de ser uma disputa de percepções e passa a ser uma conversa estruturada em torno de impacto esperado e capacidade disponível.</p>
+
+<p>O mesmo vale para dependências: quando o planejamento é explícito e compartilhado, fica evidente quais iniciativas dependem de outras para acontecer, quais squads precisam se coordenar e o que precisa estar resolvido antes de um compromisso ser assumido.</p>
+
+<p>Cada ritual e artefato descrito neste documento tem um propósito específico, um momento certo no calendário e um critério claro de sucesso. O rigor na definição não é um fim em si mesmo — é o que garante que o sistema seja compreensível, auditável e útil para quem opera dentro dele.</p>
+`},
+
+'intro-2': {
+  type: 'tatico',
+  typeLabel: 'Diagnóstico',
+  title: 'Quais problemas buscamos resolver',
+  body: `
+<p>A governança foi desenhada a partir de desafios concretos identificados no diagnóstico com as áreas. Eles se organizam em três dimensões que, juntas, cobrem o ciclo completo de como o time de produto opera: como nos comprometemos estrategicamente, como planejamos e revisamos a execução, e como mantemos visibilidade do que está sendo construído e de como estamos performando.</p>
+
+<h3>Comprometimento estratégico: da Tese à iniciativa sem perder o fio</h3>
+
+<p>A Caju tem Teses bem definidas — convicções de alto nível sobre onde e como criar valor. O que faltava era o encadeamento entre essas Teses e o trabalho que os times estavam executando. Não havia um nível intermediário estruturado que conectasse a Tese às iniciativas: sem Apostas formalizadas e sem Alavancas mensuráveis, o link entre estratégia e roadmap se perdia justamente no meio do caminho. Times construíam com esforço e intenção, mas sem rastreabilidade clara de volta ao que a empresa havia decidido priorizar.</p>
+
+<p>Além disso, comprometimentos obrigatórios — regulatório, débito técnico, sustentação — não tinham visibilidade separada. Eram absorvidos de forma difusa no portfólio, tornando difícil entender o quanto da capacidade disponível estava sendo consumida por obrigação versus por escolha estratégica.</p>
+
+<p>O modelo de desdobramento (Tese → North Star → Alavancas → Apostas → Iniciativas) preenche essa lacuna. Cada Aposta tem um 1-pager com diagnóstico, justificativa e impacto estimado na Alavanca que pretende mover. Os Passivos ganham categoria própria, com ficha estruturada e reserva de capacidade explícita. Os rituais do <strong>Planejamento Estratégico Anual</strong> e do <strong>Strategic Review</strong> semestral são os momentos em que esse modelo é construído, revisado e validado com liderança e sponsors das Teses.</p>
+
+<h3>Planejamento tático: priorização alinhada, dependências mapeadas e flexibilidade para mudar de rota</h3>
+
+<p>Com o desdobramento estratégico no lugar, o desafio seguinte é traduzir apostas em execução de forma realista e coordenada. Iniciativas eram planejadas sem confrontar a capacidade real dos squads, gerando overcommit recorrente. O planejamento acontecia de forma isolada por squad, sem que as dependências entre times fossem explicitadas — comprometimentos inatingíveis eram assumidos, e o que faltava para viabilizá-los só aparecia na execução, tarde demais para negociação.</p>
+
+<p>A priorização também não tinha critério explícito compartilhado. Apostas concorrentes competiam por capacidade sem que os trade-offs fossem visíveis para quem decidia. A empresa raramente chegava a um acordo explícito sobre o que ficaria de fora do ciclo e por quê — e áreas diferentes operavam com expectativas desalinhadas sobre o que seria o foco.</p>
+
+<p>Por fim, o plano ficava estático entre os ciclos semestrais. Novas dores ou oportunidades que surgiam ao longo do semestre não tinham canal estruturado de entrada, e não havia mecanismo de revisão para absorvê-las de forma ordenada sem desestabilizar o que já estava comprometido.</p>
+
+<p>O <strong>Planejamento de Roadmap</strong> e o <strong>Roadmap Sync Mensal</strong> reúnem PMs, liderança técnica e stakeholders para confrontar iniciativas com capacidade real, mapear dependências explicitamente e alinhar priorização em cima de impacto estimado — com os trade-offs do ciclo claros e documentados para todos. O Planejamento de Roadmap faz isso no início de cada semestre; o Sync Mensal mantém o plano calibrado ao longo do tempo, monitorando andamento, antecipando riscos e avaliando se novas demandas merecem entrar no roadmap corrente. O <strong>Intake Process</strong> é o canal estruturado que garante que dores e oportunidades relevantes sejam capturadas continuamente e cheguem ao time com contexto suficiente para avaliação.</p>
+
+<h3>Visibilidade e observabilidade: artefatos, sistema e rituais de alinhamento</h3>
+
+<p>O terceiro conjunto de desafios estava na camada de informação. Sem rigor na construção dos artefatos e sem disciplina de registro em sistema, a visibilidade do portfólio dependia de quem tinha a informação na cabeça. O status de uma iniciativa, o racional de uma decisão, a situação de uma dependência, o que estava sendo lançado e quando — tudo vivia em conversas, mensagens de Slack ou na memória das pessoas. Stakeholders de CX, CS e Vendas chegavam aos lançamentos sem as informações necessárias, porque não havia um artefato único e confiável que centralizasse o que cada área precisava saber com a antecedência correta.</p>
+
+<p>Isso tornava caro qualquer esforço de alinhamento: quem precisava de contexto tinha que perguntar; lideranças não tinham como acompanhar sem reuniões; o time de produto gastava energia reexplicando o que deveria estar documentado.</p>
+
+<p>A resposta está em três frentes complementares. Os <strong>artefatos</strong> — 1-pager de Aposta, ROD, Product Pitch, PRD — padronizam como a informação é construída e registrada, com campos obrigatórios e critério de qualidade. A <strong>disciplina de sistema</strong> — iniciativas linkadas às apostas no Notion, épicos linkados às iniciativas no Jira — garante que o portfólio seja rastreável sem depender de consolidação manual. E os <strong>rituais de monitoramento e alinhamento</strong> — Sync de Lançamentos semanal, Roadmap Sync Mensal e Dev Review trimestral — criam os momentos em que essa informação é revisada coletivamente, decisões são tomadas com contexto completo e o desempenho operacional é avaliado com dados.</p>
+`},
+
+'intro-3': {
+  type: 'operacional',
+  typeLabel: 'Resultados',
+  title: 'O que esperamos obter',
+  body: `
+<p>Os resultados esperados seguem a mesma lógica das três dimensões de problema: comprometimento estratégico, execução tática e visibilidade operacional. Estão organizados em dois horizontes — curto prazo para os primeiros seis meses, médio prazo para quando o sistema estiver maduro e operando de forma consistente.</p>
+
+<h3>Curto prazo — primeiros 6 meses</h3>
+
+<div class="result-item">
+<strong>Rastreabilidade end-to-end entre estratégia e execução</strong>
+<p>Cada iniciativa no roadmap tem uma Aposta que a origina e uma Alavanca que pretende mover. Cada épico no Jira está linkado à sua iniciativa no Notion. Qualquer pessoa no time consegue responder "por que estamos construindo isso?" sem depender de memória ou busca no Slack. A empresa opera com um desdobramento estratégico compartilhado — da Tese ao épico.</p>
+</div>
+
+<div class="result-item">
+<strong>Portfólio com capacidade, priorização e dependências explícitas</strong>
+<p>Após o primeiro ciclo de Planejamento de Roadmap, nenhum squad inicia o semestre com overcommit não explicitado. Dependências cross-squad são mapeadas e cobertas antes da execução. Os trade-offs do ciclo estão documentados — o que entra, o que fica para depois e por quê — e toda a liderança operou sobre o mesmo critério de priorização. A visibilidade de Apostas e Passivos é separada: fica claro o quanto da capacidade está sendo consumido por obrigação versus por escolha estratégica.</p>
+</div>
+
+<div class="result-item">
+<strong>Roadmap responsivo e com canal de entrada estruturado</strong>
+<p>O Roadmap Sync Mensal calibra o plano mensalmente — desvios são identificados cedo, riscos têm responsável, e novas demandas relevantes entram pelo Intake Process com o contexto necessário para avaliação. A empresa tem flexibilidade para mudar de rota quando surgem dores ou oportunidades de alto impacto, sem precisar replanejar o semestre inteiro.</p>
+</div>
+
+<div class="result-item">
+<strong>Informação centralizada, artefatos padronizados e áreas alinhadas</strong>
+<p>Os artefatos do portfólio — Apostas, iniciativas, épicos, lançamentos — estão registrados em sistema com os campos obrigatórios preenchidos. CX, CS e Vendas recebem as informações de lançamento com antecedência e pelo canal certo. O alinhamento de stakeholders passa a depender dos artefatos, não de reuniões de nivelamento.</p>
+</div>
+
+<h3>Médio prazo — 12 a 24 meses</h3>
+
+<div class="result-item">
+<strong>Priorização como competência organizacional</strong>
+<p>Com ciclos recorrentes de construção e revisão de Apostas, a empresa desenvolve vocabulário e critério compartilhados para priorizar. As conversas de planejamento ficam mais rápidas e menos conflituosas — o modelo de avaliação é conhecido, confiável e aplicado de forma consistente.</p>
+</div>
+
+<div class="result-item">
+<strong>Aderência ao planejamento como indicador de saúde</strong>
+<p>A proporção de trabalho planejado versus não planejado — monitorada pelo Dev Review — vira termômetro da qualidade do sistema. Times com alta aderência têm mais autonomia e menos interrupção. Variações recorrentes têm diagnóstico estruturado.</p>
+</div>
+
+<div class="result-item">
+<strong>Capacidade de replanejar com velocidade e precisão</strong>
+<p>Quando o contexto muda, o modelo fornece o mapa para a decisão: qual Alavanca é afetada, quais Apostas precisam ser revisadas, o que entra e o que sai. Dependências mapeadas nos ciclos anteriores tornam esse replanejamento mais rápido — o time sabe o que está conectado ao quê e consegue avaliar o efeito cascata sem partir do zero.</p>
+</div>
+`}
+
+};
+
+function openIntroModal(id) {
+  const d = introData[id];
+  if (!d) return;
+  document.getElementById('introModalType').className = 'modal-type ' + d.type;
+  document.getElementById('introModalType').textContent = d.typeLabel;
+  document.getElementById('introModalTitle').textContent = d.title;
+  document.getElementById('introModalBody').innerHTML = d.body;
+  document.getElementById('introModalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeIntroModal(e) {
+  if (e && e.target !== document.getElementById('introModalOverlay')) return;
+  document.getElementById('introModalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal(); closeIntroModal(); }
+});
+</script>
+
+</body>
+</html>
