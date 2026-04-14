@@ -1182,29 +1182,29 @@ body {
       </div>
     </div>
 
-    <!-- ── Dev Review — trimestral: Fev(15-16), Mai(21-22), Ago(27-28), Nov(33-34) ── -->
+    <!-- ── Stream Review — trimestral: Fev(15-16), Mai(21-22), Ago(27-28), Nov(33-34) — upstream + downstream ── -->
     <div class="band-row">
       <div style="grid-column: 15/17; display:flex">
-        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
-          <span class="block-title">Dev Review</span>
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('stream-review')">
+          <span class="block-title">Stream Review</span>
           <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
         </div>
       </div>
       <div style="grid-column: 21/23; display:flex">
-        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
-          <span class="block-title">Dev Review</span>
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('stream-review')">
+          <span class="block-title">Stream Review</span>
           <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
         </div>
       </div>
       <div style="grid-column: 27/29; display:flex">
-        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
-          <span class="block-title">Dev Review</span>
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('stream-review')">
+          <span class="block-title">Stream Review</span>
           <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
         </div>
       </div>
       <div style="grid-column: 33/35; display:flex">
-        <div class="block ritual-operacional" style="flex:1" onclick="openModal('dev-review')">
-          <span class="block-title">Dev Review</span>
+        <div class="block ritual-operacional" style="flex:1" onclick="openModal('stream-review')">
+          <span class="block-title">Stream Review</span>
           <span class="block-sub" style="font-size:7.5px">Pops + Head Tech + Nanda</span>
         </div>
       </div>
@@ -1552,49 +1552,48 @@ const data = {
 <div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Iniciativas no sistema, Intake Process.<br>Alimenta: próximo Sync Mensal · Planejamento de Roadmap · liderança de produto (riscos escalados).</div>
 `},
 
-'dev-review': {
+'stream-review': {
   type: 'operacional',
   typeLabel: 'Ritual · Operacional',
-  title: 'Dev Review',
+  title: 'Stream Review',
   body: `
 <div class="meta-grid">
   <div class="meta-item"><div class="meta-label">Cadência</div><div class="meta-value">Trimestral — Fev, Mai, Ago, Nov</div></div>
   <div class="meta-item"><div class="meta-label">Modelo</div><div class="meta-value">Assíncrono (preparação) → Síncrono (sessão) → Assíncrono (comunicação)</div></div>
-  <div class="meta-item"><div class="meta-label">Donos</div><div class="meta-value">Heads de Engenharia</div></div>
+  <div class="meta-item"><div class="meta-label">Donos</div><div class="meta-value">Heads de Produto + Heads de Engenharia (co-ownership — upstream é produto, downstream é engenharia)</div></div>
   <div class="meta-item"><div class="meta-label">Público</div><div class="meta-value">Heads de Engenharia + Heads de Produto + Product Ops + Nanda</div></div>
 </div>
 <h3>Propósito</h3>
-<p>Garantir que a liderança de produto tenha visibilidade sobre a saúde da operação de desenvolvimento — não para microgerenciar, mas para sair da subjetividade e ter evidências que fundamentem decisões sobre produtividade, qualidade e capacidade. Sem esse ritual, percepções de baixa entrega circulam sem dado que as confirme ou refute.</p>
+<p>Garantir que a liderança de produto tenha visibilidade sobre a saúde do fluxo completo de desenvolvimento de produto — do upstream (discovery, refinamento, sizing) ao downstream (execução, entrega, deploy). Não para microgerenciar, mas para sair da subjetividade e ter evidências que fundamentem decisões sobre velocidade de validação de hipóteses, qualidade e capacidade. Sem esse ritual, gargalos no fluxo só aparecem quando o impacto já é visível nos resultados.</p>
 <h3>O que é</h3>
-<p>Ritual trimestral conduzido pelos Heads de Engenharia, focado exclusivamente no downstream — ou seja, na execução: o que está sendo entregue, em que velocidade, com qual qualidade e quanto do trabalho estava planejado. Product Ops atua como arquiteto do ritual e consumidor dos outputs.</p>
+<p>Ritual trimestral que analisa o fluxo de ponta a ponta — desde a ideação e refinamento até a entrega em produção. Upstream: quanto tempo leva da ideia ao início do desenvolvimento? Há acúmulo de itens refinados parados? O discovery está alimentando o delivery no ritmo certo? Downstream: o que está sendo entregue, em que velocidade, com qual qualidade e quanto do trabalho estava planejado? Product Ops atua como arquiteto do ritual e consumidor dos outputs.</p>
 <h3>Pré-condição de maturidade</h3>
-<p>Pressupõe que o Jira está sendo usado de forma disciplinada e confiável. Antes de rodar em formato pleno, Product Ops deve verificar se o sistema está sendo alimentado de forma consistente. Se não, começa com escopo reduzido.</p>
+<p>Pressupõe que o Jira está sendo usado de forma disciplinada e confiável para downstream, e que o Notion (ou sistema equivalente) registra o pipeline de discovery e refinamento para upstream. Antes de rodar em formato pleno, Product Ops deve verificar se ambos os sistemas estão sendo alimentados de forma consistente. Se não, começa com escopo reduzido — downstream primeiro, upstream incorporado à medida que a disciplina de registro amadurece.</p>
 <h3>Métricas</h3>
 <ul>
-  <li>Throughput — épicos/histórias entregues no período</li>
-  <li>Lead time — tempo médio entre abertura e fechamento de épicos</li>
-  <li>Proporção de trabalho planejado vs. não planejado</li>
-  <li>Indicadores de saúde do software (deployment frequency, MTTR — quando disponíveis)</li>
-  <li>Link entre épicos no Jira e iniciativas no sistema</li>
+  <li><strong>Upstream</strong> — work item age (idade dos itens em discovery/refinamento), cycle time de upstream (da ideação ao ready for dev), WIP de itens em refinamento, taxa de itens que voltam do refinamento por falta de definição</li>
+  <li><strong>Downstream</strong> — throughput (épicos/histórias entregues no período), lead time (abertura → fechamento), proporção de trabalho planejado vs. não planejado, deployment frequency, MTTR (quando disponíveis)</li>
+  <li><strong>Full stream</strong> — cycle time total (ideação → produção), link entre épicos no Jira e iniciativas no sistema, itens parados entre estágios (handoff gaps)</li>
 </ul>
 <h3>Preparação (semana anterior)</h3>
-<p>Heads de Engenharia consolidam os dados do período. Product Ops verifica confiabilidade e alinha quais perguntas o ritual deve responder nessa edição.</p>
+<p>Heads de Engenharia consolidam dados de downstream. Heads de Produto consolidam dados de upstream (pipeline de discovery, itens em refinamento, backlog age). Product Ops cruza os dois lados, verifica confiabilidade e alinha quais perguntas o ritual deve responder nessa edição.</p>
 <h3>Sessão trimestral</h3>
 <ol>
   <li>Abertura — Product Ops apresenta perguntas centrais e contexto (~5 min)</li>
-  <li>Apresentação por Product Area — Heads de Engenharia apresentam throughput, lead time, planejado vs. não planejado. Comparação sempre com histórico do próprio time, nunca entre squads (~30–40 min)</li>
-  <li>Análise e provocações — Heads de Produto questionam: variações, platôs, épicos sem link com iniciativas (~15 min)</li>
+  <li>Upstream por Product Area — Heads de Produto apresentam: pipeline de discovery, WIP de refinamento, work item age, taxa de itens prontos vs. demanda de squads (~20–25 min)</li>
+  <li>Downstream por Product Area — Heads de Engenharia apresentam: throughput, lead time, planejado vs. não planejado. Comparação sempre com histórico do próprio time, nunca entre squads (~20–25 min)</li>
+  <li>Análise de fluxo completo — participantes cruzam upstream e downstream: onde o fluxo está travando? Há desbalanceamento entre discovery e delivery? Épicos sem link com iniciativas? (~15 min)</li>
   <li>Encaminhamentos — sinais que exigem ação, pontos para levar à Nanda</li>
 </ol>
 <h3>Comunicação pós-sessão</h3>
 <p>Product Ops consolida achados e encaminhamentos. Registro compartilhado com Nanda e participantes.</p>
 <h3>Tempo estimado</h3>
-<p>Sessão: ~60–90 min. Preparação Heads Eng: 2–3h. Consolidação Product Ops: 1–2h.</p>
+<p>Sessão: ~90–120 min. Preparação Heads Eng: 2–3h. Preparação Heads Produto: 2–3h. Consolidação Product Ops: 2–3h.</p>
 <h3>Impacto se deixar de existir</h3>
-<p>Liderança opera sem dados. Percepções subjetivas circulam sem evidência. Pedidos de contratação e realocação são tomados sem fundamento. Desvios entre planejado e entregue só aparecem quando o dano já está feito.</p>
+<p>Liderança opera sem dados. Gargalos entre discovery e delivery ficam invisíveis — times constroem rápido as coisas erradas ou refinam bem mas não entregam. Percepções subjetivas circulam sem evidência. Pedidos de contratação e realocação são tomados sem fundamento. O ciclo de validação de hipóteses fica lento sem que ninguém consiga apontar onde está o problema.</p>
 <h3>Critério de sucesso</h3>
-<p>Dados confiáveis. Comparação sempre com histórico próprio. Todos os encaminhamentos com responsável. Registro chega à Nanda antes da próxima sessão de planejamento ou revisão.</p>
-<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: uso disciplinado do Jira, link épicos → iniciativas.<br>Alimenta: Roadmap Sync Mensal (riscos operacionais) · Planejamento de Roadmap (evidências de capacidade) · liderança de produto.</div>
+<p>Dados confiáveis em ambos os lados do fluxo. Comparação sempre com histórico próprio. Gargalos entre estágios identificados com dados, não com opinião. Todos os encaminhamentos com responsável. Registro chega à Nanda antes da próxima sessão de planejamento ou revisão.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: uso disciplinado do Jira (downstream) + Notion/sistema de discovery (upstream), link épicos → iniciativas → apostas.<br>Alimenta: Roadmap Sync Mensal (riscos operacionais e de fluxo) · Planejamento de Roadmap (evidências de capacidade e velocidade de validação) · liderança de produto.</div>
 `},
 
 'intake': {
@@ -1671,12 +1670,12 @@ const data = {
   title: 'Ciclo de Desenvolvimento de Produto',
   body: `
 <h3>O que é</h3>
-<p>Ciclo de desenvolvimento que acontece continuamente ao longo do ano — squads trabalhando nos Épicos priorizados no Planejamento de Roadmap, com visibilidade garantida pelo Dev Review trimestral.</p>
+<p>Ciclo de desenvolvimento que acontece continuamente ao longo do ano — squads trabalhando nos Épicos priorizados no Planejamento de Roadmap, com visibilidade garantida pelo Stream Review trimestral.</p>
 <h3>Rastreabilidade</h3>
-<p>Épico no Jira → Iniciativa no Notion → Aposta ou Passivo. Essa cadeia garante que o Dev Review consegue responder: "este Épico está contribuindo para qual Aposta?"</p>
-<h3>Relação com o Dev Review</h3>
-<p>O Dev Review não interfere no ciclo — observa e mede. As métricas de throughput, lead time e trabalho planejado vs. não planejado são coletadas do Jira e apresentadas trimestralmente.</p>
-<div class="connect-box"><strong>Conecta com:</strong><br>Ferramentas: Jira (Épicos) + Notion (Roadmap Centralizado).<br>Alimenta: Dev Review.</div>
+<p>Épico no Jira → Iniciativa no Notion → Aposta ou Passivo. Essa cadeia garante que o Stream Review consegue responder: "este Épico está contribuindo para qual Aposta?"</p>
+<h3>Relação com o Stream Review</h3>
+<p>O Stream Review não interfere no ciclo — observa e mede. No downstream, métricas de throughput, lead time e trabalho planejado vs. não planejado são coletadas do Jira. No upstream, o pipeline de discovery e refinamento é avaliado via Notion. Ambos são apresentados trimestralmente.</p>
+<div class="connect-box"><strong>Conecta com:</strong><br>Ferramentas: Jira (Épicos) + Notion (Roadmap Centralizado + pipeline de discovery).<br>Alimenta: Stream Review.</div>
 `},
 
 'budget': {
@@ -1857,14 +1856,14 @@ const data = {
   <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM + Product Ops</div></div>
 </div>
 <h3>O que é</h3>
-<p>Registro das Iniciativas priorizadas no Notion, linkadas à Aposta ou Passivo de origem. É o que o Roadmap Sync Mensal monitora e a base para os Dev Reviews.</p>
+<p>Registro das Iniciativas priorizadas no Notion, linkadas à Aposta ou Passivo de origem. É o que o Roadmap Sync Mensal monitora e a base para os Stream Reviews.</p>
 <h3>Links obrigatórios</h3>
 <ul>
   <li>→ Aposta ou Passivo de origem (rastreabilidade estratégica)</li>
   <li>→ Épicos derivados no Jira (rastreabilidade operacional)</li>
   <li>→ ROD quando lançamento está próximo (rastreabilidade de lançamento)</li>
 </ul>
-<div class="connect-box"><strong>Conecta com:</strong><br>Alimentada por: Planejamento de Roadmap, Product Pitch aprovado.<br>Alimenta: Roadmap Sync Mensal · Dev Review · ROD.</div>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentada por: Planejamento de Roadmap, Product Pitch aprovado.<br>Alimenta: Roadmap Sync Mensal · Stream Review · ROD.</div>
 `},
 
 'art-rod': {
@@ -1926,7 +1925,7 @@ const data = {
 <p>Escopo sem ambiguidade. Critérios de aceitação verificáveis. Cenários de erro cobrem conectividade, validação e estados vazios. Dependências com owner e prazo. Estimativa validada com time técnico.</p>
 <h3>Impacto se deixar de existir</h3>
 <p>Requisitos viram conversas individuais. Cenários de erro só aparecem em produção. Escopo escorrega sem registro. QA sem base para testes.</p>
-<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Product Pitch · Iniciativa · refinamento com tríade.<br>Alimenta: Épico no Jira · Dev Review.</div>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: Product Pitch · Iniciativa · refinamento com tríade.<br>Alimenta: Épico no Jira · Stream Review.</div>
 `},
 
 'art-epicos-sistema': {
@@ -1939,21 +1938,21 @@ const data = {
   <div class="meta-item"><div class="meta-label">Responsável</div><div class="meta-value">PM + Engenharia</div></div>
 </div>
 <h3>O que é</h3>
-<p>Registro dos Épicos no Jira, linkados às Iniciativas no Notion. Conecta planejamento e execução técnica — e é o que o Dev Review monitora trimestralmente.</p>
+<p>Registro dos Épicos no Jira, linkados às Iniciativas no Notion. Conecta planejamento e execução técnica — e é o que o Stream Review monitora trimestralmente.</p>
 <h3>Links obrigatórios</h3>
 <ul>
   <li>→ Iniciativa no Notion (rastreabilidade estratégica)</li>
   <li>→ PRD (especificação da entrega)</li>
   <li>→ ROD quando é um lançamento (rastreabilidade de lançamento)</li>
 </ul>
-<h3>O que o Dev Review monitora</h3>
+<h3>O que o Stream Review monitora (downstream)</h3>
 <ul>
   <li>Throughput — quantidade de épicos entregues no período</li>
   <li>Lead time — tempo médio entre abertura e fechamento</li>
   <li>Proporção de trabalho planejado vs. não planejado</li>
   <li>Épicos sem link com Iniciativas (sinal de trabalho fora do portfólio acordado)</li>
 </ul>
-<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: PRD · Iniciativas no sistema · Planejamento de Roadmap.<br>Alimenta: Dev Review (métricas de saúde) · ROD (rastreabilidade de lançamento).</div>
+<div class="connect-box"><strong>Conecta com:</strong><br>Alimentado por: PRD · Iniciativas no sistema · Planejamento de Roadmap.<br>Alimenta: Stream Review (métricas de saúde) · ROD (rastreabilidade de lançamento).</div>
 `},
 
 // ─── NÍVEIS DE DESDOBRAMENTO ──────────────────
@@ -2118,7 +2117,7 @@ const introData = {
 
 <p>Isso tornava caro qualquer esforço de alinhamento: quem precisava de contexto tinha que perguntar; lideranças não tinham como acompanhar sem reuniões; o time de produto gastava energia reexplicando o que deveria estar documentado.</p>
 
-<p>A resposta está em três frentes complementares. Os <strong>artefatos</strong> — 1-pager de Aposta, ROD, Product Pitch, PRD — padronizam como a informação é construída e registrada, com campos obrigatórios e critério de qualidade. A <strong>disciplina de sistema</strong> — iniciativas linkadas às apostas no Notion, épicos linkados às iniciativas no Jira — garante que o portfólio seja rastreável sem depender de consolidação manual. E os <strong>rituais de monitoramento e alinhamento</strong> — Sync de Lançamentos semanal, Roadmap Sync Mensal e Dev Review trimestral — criam os momentos em que essa informação é revisada coletivamente, decisões são tomadas com contexto completo e o desempenho operacional é avaliado com dados.</p>
+<p>A resposta está em três frentes complementares. Os <strong>artefatos</strong> — 1-pager de Aposta, ROD, Product Pitch, PRD — padronizam como a informação é construída e registrada, com campos obrigatórios e critério de qualidade. A <strong>disciplina de sistema</strong> — iniciativas linkadas às apostas no Notion, épicos linkados às iniciativas no Jira — garante que o portfólio seja rastreável sem depender de consolidação manual. E os <strong>rituais de monitoramento e alinhamento</strong> — Sync de Lançamentos semanal, Roadmap Sync Mensal e Stream Review trimestral — criam os momentos em que essa informação é revisada coletivamente, decisões são tomadas com contexto completo e o desempenho operacional é avaliado com dados.</p>
 `},
 
 'intro-3': {
@@ -2159,7 +2158,7 @@ const introData = {
 
 <div class="result-item">
 <strong>Aderência ao planejamento como indicador de saúde</strong>
-<p>A proporção de trabalho planejado versus não planejado — monitorada pelo Dev Review — vira termômetro da qualidade do sistema. Times com alta aderência têm mais autonomia e menos interrupção. Variações recorrentes têm diagnóstico estruturado.</p>
+<p>A proporção de trabalho planejado versus não planejado — monitorada pelo Stream Review — vira termômetro da qualidade do sistema. Times com alta aderência têm mais autonomia e menos interrupção. Variações recorrentes têm diagnóstico estruturado.</p>
 </div>
 
 <div class="result-item">
